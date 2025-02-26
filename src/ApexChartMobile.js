@@ -50,7 +50,7 @@ const ApexChartMobile = () => {
                 useFillColorAsStroke: true,
                 colorScale: {
                   ranges: [
-                  { from: 0, to: 0, name: "Failed", color: "#FF0000" },
+                    { from: 0, to: 0, name: "Failed", color: "#FF0000" },
                     { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
                     { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
                   ],
@@ -61,7 +61,7 @@ const ApexChartMobile = () => {
               enabled: false,
             },
             title: {
-              text: "dasdasdasdas HeatMap",
+              text: "Activity HeatMap",
             },
             xaxis: {
               type: "category",
@@ -76,6 +76,9 @@ const ApexChartMobile = () => {
                 },
               },
             },
+            grid: {
+              padding: { right: 5, left: 5 },
+            },
           },
         });
       })
@@ -85,7 +88,7 @@ const ApexChartMobile = () => {
   return (
     <div>
       <h2>Activity Heatmap</h2>
-      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={600} />
+      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={300} width={300} />
     </div>
   );
 };
