@@ -3,90 +3,86 @@ import ReactApexChart from "react-apexcharts";
 
 const API_URL = "https://activit.free.beeceptor.com/api/v3/activities";
 
-// Función para convertir la fecha de DD-MM-YYYY a YYYY-MM-DD
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);
-  return `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+  return { year, month, day, formatted: `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}` };
 };
 
-// Transformar los datos para que las fechas sean las filas y las actividades las columnas
 const transformData = (data) => {
   const activityNames = Object.keys(data.activities);
+  const recordsByMonth = {};
 
-  // Obtener todas las fechas únicas
-  const uniqueDates = [
-    ...new Set(Object.values(data.activities).flatMap((records) => records.map(({ date }) => parseDate(date)))),
-  ].sort();
+  activityNames.forEach((activity) => {
+    data.activities[activity].forEach((record) => {
+      const { year, month, day, formatted } = parseDate(record.date);
+      const key = `${year}-${month.toString().padStart(2, "0")}`;
+      
+      if (!recordsByMonth[key]) recordsByMonth[key] = {};
+      if (!recordsByMonth[key][formatted]) recordsByMonth[key][formatted] = {};
+      recordsByMonth[key][formatted][activity] = record.status;
+    });
+  });
 
-  // Construimos la serie basada en fechas
-  return uniqueDates.map((date) => ({
-    name: date, // Fechas en el eje Y
-    data: activityNames.map((activity) => {
-      // Buscar si hay un registro para esta actividad y esta fecha
-      const record = data.activities[activity]?.find((r) => parseDate(r.date) === date);
-      let yValue = null;
-      if (record) {
-        if (record.status === "accomplished") yValue = 1;
-        else if (record.status === "failed") yValue = 0;
-        else if (record.status === "regular") yValue = 0.5;
-      }
+  return recordsByMonth;
+};
 
-      return { x: activity, y: yValue }; // Actividades en el eje X
-    }),
+const mapStatusToValue = (status) => {
+  switch (status) {
+    case "accomplished": return 1;
+    case "failed": return 0;
+    case "regular": return 0.5;
+    default: return null;
+  }
+};
+
+const generateChartData = (records) => {
+  const uniqueDates = Object.keys(records).sort();
+  const activityNames = [...new Set(Object.values(records).flatMap(Object.keys))];
+
+  return activityNames.map((activity) => ({
+    name: activity,
+    data: uniqueDates.map((date) => ({ x: date, y: mapStatusToValue(records[date][activity]) }))
   }));
 };
 
 const ApexChart = () => {
-  const [chartData, setChartData] = useState({ series: [], options: {} });
+  const [charts, setCharts] = useState({});
 
   useEffect(() => {
     fetch(API_URL)
       .then((response) => response.json())
       .then((data) => {
-        const series = transformData(data);
+        const transformedData = transformData(data);
+        const chartConfigs = {};
 
-        setChartData({
-          series,
-          options: {
-            chart: {
-              height: 9000,
-              type: "heatmap",
-            },
-            plotOptions: {
-              heatmap: {
-                shadeIntensity: 0.5,
-                radius: 0,
-                useFillColorAsStroke: true,
-                colorScale: {
-                  ranges: [
-                    { from: 0, to: 0, name: "Failed", color: "#FF0000" },
-                    { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
-                    { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
-                  ],
+        Object.entries(transformedData).forEach(([month, records]) => {
+          chartConfigs[month] = {
+            series: generateChartData(records),
+            options: {
+              chart: { height: 600, type: "heatmap" },
+              plotOptions: {
+                heatmap: {
+                  shadeIntensity: 0.5,
+                  radius: 0,
+                  useFillColorAsStroke: true,
+                  colorScale: {
+                    ranges: [
+                      { from: 0, to: 0, name: "Failed", color: "#FF0000" },
+                      { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
+                      { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
+                    ],
+                  },
                 },
               },
+              dataLabels: { enabled: false },
+              title: { text: `Activity Heatmap - ${month}` },
+              xaxis: { type: "category", title: { text: "Dates" } },
+              yaxis: { title: { text: "Activities" } },
             },
-            dataLabels: {
-              enabled: false,
-            },
-            title: {
-              text: "Activity HeatMap",
-            },
-            xaxis: {
-              type: "category",
-              title: { text: "Activities" }, // Actividades en el eje X
-            },
-            yaxis: {
-              title: { text: "Dates" }, // Fechas en el eje Y
-              labels: {
-                style: {
-                  fontSize: "12px",
-                  minHeight: 200,  // Asegura que cada fila tenga espacio suficiente
-                },
-              },
-            },
-          },
+          };
         });
+
+        setCharts(chartConfigs);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
@@ -94,7 +90,12 @@ const ApexChart = () => {
   return (
     <div>
       <h2>Activity Heatmap</h2>
-      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={9000} />
+      {Object.entries(charts).map(([month, config]) => (
+        <div key={month}>
+          <h3>{month}</h3>
+          <ReactApexChart options={config.options} series={config.series} type="heatmap" height={600} />
+        </div>
+      ))}
     </div>
   );
 };
