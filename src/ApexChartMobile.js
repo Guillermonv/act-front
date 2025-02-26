@@ -41,7 +41,7 @@ const ApexChartMobile = () => {
           options: {
             chart: {
               height: 1600, // Aumento la altura del gráfico
-              width: 1500,
+              width: 500,
               type: "heatmap",
             },
             plotOptions: {
@@ -62,7 +62,7 @@ const ApexChartMobile = () => {
               enabled: false,
             },
             title: {
-              text: "Activity HeatMap",
+              text: "Activity HeatMap1",
             },
             xaxis: {
               type: "category",
