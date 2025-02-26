@@ -40,7 +40,8 @@ const ApexChartMobile = () => {
           series,
           options: {
             chart: {
-              height: 600,
+              height: 500,
+              width: 500,
               type: "heatmap",
             },
             plotOptions: {
@@ -88,7 +89,7 @@ const ApexChartMobile = () => {
   return (
     <div>
       <h2>Activity Heatmap</h2>
-      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={300} width={300} />
+      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={500} width={500} />
     </div>
   );
 };
