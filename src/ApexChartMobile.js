@@ -40,8 +40,8 @@ const ApexChartMobile = () => {
           series,
           options: {
             chart: {
-              height: 1600, // Aumento la altura del gráfico
-              width: 500,
+              height: 5000, // *10 altura
+              width: 5000, // *10 ancho
               type: "heatmap",
             },
             plotOptions: {
@@ -60,26 +60,31 @@ const ApexChartMobile = () => {
             },
             dataLabels: {
               enabled: false,
+              style: {
+                fontSize: "100px", // *10 tamaño de fuente
+              },
             },
             title: {
-              text: "Activity HeatMap1",
+              text: "Activity HeatMap",
+              style: {
+                fontSize: "100px", // *10 tamaño del título
+              },
             },
             xaxis: {
               type: "category",
-              title: { text: "Activities" },
-              labels: { rotate: -45 },
+              title: { text: "Activities", style: { fontSize: "100px" } }, // *10 tamaño del título del eje
+              labels: { rotate: -45, style: { fontSize: "100px" } }, // *10 tamaño de etiquetas
             },
             yaxis: {
-              title: { text: "Dates" },
+              title: { text: "Dates", style: { fontSize: "100px" } }, // *10 tamaño del título del eje
               labels: {
                 style: {
-                  fontSize: "14px", // Aumento el tamaño de la fuente de las fechas
-                  fontWeight: 600,  // Hago el texto un poco más grueso
+                  fontSize: "100px", // *10 tamaño de fuente del eje Y
                 },
               },
             },
             grid: {
-              padding: { right: 5, left: 5 },
+              padding: { right: 50, left: 50 }, // *10 espacio en grid
             },
           },
         });
@@ -89,8 +94,8 @@ const ApexChartMobile = () => {
 
   return (
     <div>
-      <h2>Activity Heatmap</h2>
-      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={600} width={500} />
+      <h2 style={{ fontSize: "100px" }}>Activity Heatmap</h2> {/* *10 tamaño del título */}
+      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={5000} width={5000} />
     </div>
   );
 };
