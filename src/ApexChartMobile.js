@@ -40,8 +40,8 @@ const ApexChartMobile = () => {
           series,
           options: {
             chart: {
-              height: 600, // Aumento la altura del gráfico
-              width: 500,
+              height: 1600, // Aumento la altura del gráfico
+              width: 1500,
               type: "heatmap",
             },
             plotOptions: {
