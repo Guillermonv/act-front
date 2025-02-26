@@ -40,7 +40,7 @@ const ApexChartMobile = () => {
           series,
           options: {
             chart: {
-              height: 1600, // Aumento la altura del gráfico
+              height: 1600,
               width: 500,
               type: "heatmap",
             },
@@ -62,23 +62,29 @@ const ApexChartMobile = () => {
               enabled: false,
             },
             title: {
-              text: "Activity HeatMap1",
+              text: "Activity HeatMap",
             },
             xaxis: {
               type: "category",
-              title: { text: "Activities", offsetY: -10 },
-              position: "top",
-              labels: { rotate: -45 },
+              title: { text: "Activities" },
+              position: "top", // Mueve las actividades arriba
+              labels: {
+                rotate: -90, // Gira los nombres para mejor visibilidad
+                style: {
+                  fontSize: "14px",
+                  fontWeight: 600,
+                },
+              },
             },
             yaxis: {
               title: { text: "Dates" },
+              opposite: true, // Mueve las fechas al lado derecho
               labels: {
                 style: {
-                  fontSize: "14px", // Aumento el tamaño de la fuente de las fechas
-                  fontWeight: 600,  // Hago el texto un poco más grueso
+                  fontSize: "14px",
+                  fontWeight: 600,
                 },
               },
-              opposite: true, // Mueve las fechas a la derecha
             },
             grid: {
               padding: { right: 5, left: 5 },
@@ -92,7 +98,7 @@ const ApexChartMobile = () => {
   return (
     <div>
       <h2>Activity Heatmap</h2>
-      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={1600} width={500} />
+      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={600} width={500} />
     </div>
   );
 };
