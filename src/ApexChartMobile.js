@@ -78,7 +78,7 @@ const ApexChartMobile = () => {
             },
             yaxis: {
               title: { text: "Dates" },
-              opposite: true, // Mueve las fechas al lado derecho
+              opposite: false, // Ahora los días aparecen a la izquierda
               labels: {
                 style: {
                   fontSize: "14px",
