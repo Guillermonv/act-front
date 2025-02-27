@@ -1,120 +1,109 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
-import Slider from "@mui/material/Slider";
 
 const API_URL = "https://activity1.free.beeceptor.com/api/v3/activities";
 
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);
-  return { year, month, formatted: `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}` };
+  return { year, month, day, formatted: `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}` };
 };
 
-const transformData = (data) => {
-  const recordsByMonth = {};
-  
-  Object.entries(data.activities).forEach(([activity, records]) => {
-    records.forEach(({ date, status }) => {
-      const { year, month, formatted } = parseDate(date);
-      const key = `${year}-${month.toString().padStart(2, "0")}`;
-      if (!recordsByMonth[key]) recordsByMonth[key] = {};
-      if (!recordsByMonth[key][formatted]) recordsByMonth[key][formatted] = {};
-      recordsByMonth[key][formatted][activity] = status;
+const getQuarter = (month) => {
+  if (month >= 1 && month <= 3) return 1;
+  if (month >= 4 && month <= 6) return 2;
+  if (month >= 7 && month <= 9) return 3;
+  return 4;
+};
+
+const transformData = (data, selectedQuarter) => {
+  const activityNames = Object.keys(data.activities);
+  const uniqueDates = [];
+  const filteredData = [];
+
+  activityNames.forEach((activity) => {
+    data.activities[activity].forEach((record) => {
+      const { year, month, formatted } = parseDate(record.date);
+      if (getQuarter(month) === selectedQuarter) {
+        if (!uniqueDates.includes(formatted)) uniqueDates.push(formatted);
+        filteredData.push({ activity, date: formatted, status: record.status });
+      }
     });
   });
-  return recordsByMonth;
-};
+  
+  uniqueDates.sort();
 
-const mapStatusToValue = (status) => {
-  switch (status) {
-    case "accomplished": return 1;
-    case "failed": return 0;
-    case "regular": return 0.5;
-    default: return null;
-  }
-};
-
-const generateChartData = (records) => {
-  const uniqueDates = Object.keys(records).sort();
-  const activityNames = [...new Set(Object.values(records).flatMap(Object.keys))];
-  return activityNames.map((activity) => ({
-    name: activity,
-    data: uniqueDates.map((date) => ({ x: date, y: mapStatusToValue(records[date][activity]) }))
+  return uniqueDates.map((date) => ({
+    name: date,
+    data: activityNames.map((activity) => {
+      const record = filteredData.find((r) => r.activity === activity && r.date === date);
+      let yValue = null;
+      if (record) {
+        if (record.status === "accomplished") yValue = 1;
+        else if (record.status === "failed") yValue = 0;
+        else if (record.status === "regular") yValue = 0.5;
+      }
+      return { x: activity, y: yValue };
+    }),
   }));
 };
 
 const ApexChartMobile = () => {
-  const [charts, setCharts] = useState({});
-  const [quarter, setQuarter] = useState(1);
+  const [chartData, setChartData] = useState({ series: [], options: {} });
+  const [selectedQuarter, setSelectedQuarter] = useState(1);
 
   useEffect(() => {
     fetch(API_URL)
       .then((response) => response.json())
       .then((data) => {
-        const transformedData = transformData(data);
-        const chartConfigs = {};
+        const series = transformData(data, selectedQuarter);
 
-        Object.entries(transformedData).forEach(([month, records]) => {
-          chartConfigs[month] = {
-            series: generateChartData(records),
-            options: {
-              chart: { height: 600, type: "heatmap" },
-              plotOptions: {
-                heatmap: {
-                  shadeIntensity: 0.5,
-                  radius: 0,
-                  useFillColorAsStroke: true,
-                  colorScale: {
-                    ranges: [
-                      { from: 0, to: 0, name: "Failed", color: "#FF0000" },
-                      { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
-                      { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
-                    ],
-                  },
+        setChartData({
+          series,
+          options: {
+            chart: { height: 600, width: 500, type: "heatmap" },
+            plotOptions: {
+              heatmap: {
+                shadeIntensity: 0.5,
+                radius: 0,
+                useFillColorAsStroke: true,
+                colorScale: {
+                  ranges: [
+                    { from: 0, to: 0, name: "Failed", color: "#FF0000" },
+                    { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
+                    { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
+                  ],
                 },
               },
-              dataLabels: { enabled: false },
-              title: { text: `Activity Heatmap - ${month}` },
-              xaxis: { type: "category", title: { text: "Dates" } },
-              yaxis: { title: { text: "Activities" }, opposite: true },
             },
-          };
+            dataLabels: { enabled: false },
+            title: { text: `Activity HeatMap - Q${selectedQuarter}` },
+            xaxis: {
+              type: "category",
+              title: { text: "Activities" },
+              labels: { rotate: -90 },
+            },
+            yaxis: {
+              title: { text: "Dates" },
+              opposite: true,
+              labels: { style: { fontSize: "14px", fontWeight: 600 } },
+            },
+          },
         });
-
-        setCharts(chartConfigs);
       })
       .catch((error) => console.error("Error fetching data:", error));
-  }, []);
-
-  const getQuarterMonths = (q) => {
-    const quarters = {
-      1: ["01", "02", "03"],
-      2: ["04", "05", "06"],
-      3: ["07", "08", "09"],
-      4: ["10", "11", "12"],
-    };
-    return quarters[q] || [];
-  };
+  }, [selectedQuarter]);
 
   return (
     <div>
       <h2>Activity Heatmap</h2>
-      <Slider
-        value={quarter}
-        min={1}
-        max={4}
-        step={1}
-        marks
-        onChange={(_, value) => setQuarter(value)}
-        valueLabelDisplay="auto"
-      />
-      {Object.entries(charts)
-        .filter(([month]) => getQuarterMonths(quarter).includes(month.split("-")[1]))
-        .map(([month, config]) => (
-          <div key={month}>
-            <h3>{month}</h3>
-            <ReactApexChart options={config.options} series={config.series} type="heatmap" height={600} />
-          </div>
-        ))}
+      <label>Select Quarter:</label>
+      <select onChange={(e) => setSelectedQuarter(Number(e.target.value))} value={selectedQuarter}>
+        <option value={1}>Q1 (Jan-Mar)</option>
+        <option value={2}>Q2 (Apr-Jun)</option>
+        <option value={3}>Q3 (Jul-Sep)</option>
+        <option value={4}>Q4 (Oct-Dec)</option>
+      </select>
+      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={600} width={500} />
     </div>
   );
 };
