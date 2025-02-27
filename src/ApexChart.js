@@ -44,7 +44,7 @@ const generateChartData = (records) => {
   }));
 };
 
-const ApexChartMobile = () => {
+const ApexChart = () => {
   const [charts, setCharts] = useState({});
   const [selectedQuarter, setSelectedQuarter] = useState("Q1");
 
@@ -117,4 +117,4 @@ const ApexChartMobile = () => {
   );
 };
 
-export default ApexChartMobile;
+export default ApexChart;
