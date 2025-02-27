@@ -8,93 +8,111 @@ const parseDate = (dateStr) => {
   return { year, month, day, formatted: `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}` };
 };
 
-const transformData = (data, quarter) => {
+const transformData = (data) => {
   const activityNames = Object.keys(data.activities);
-  const filteredDates = Object.values(data.activities)
-    .flatMap((records) => records.map(({ date }) => parseDate(date)))
-    .filter(({ month }) => Math.ceil(month / 3) === quarter)
-    .sort((a, b) => a.formatted.localeCompare(b.formatted));
+  const recordsByMonth = {};
 
-  const uniqueDates = [...new Set(filteredDates.map(({ formatted }) => formatted))];
+  activityNames.forEach((activity) => {
+    data.activities[activity].forEach((record) => {
+      const { year, month, formatted } = parseDate(record.date);
+      const key = `${year}-${month.toString().padStart(2, "0")}`;
+      
+      if (!recordsByMonth[key]) recordsByMonth[key] = {};
+      if (!recordsByMonth[key][formatted]) recordsByMonth[key][formatted] = {};
+      recordsByMonth[key][formatted][activity] = record.status;
+    });
+  });
+  return recordsByMonth;
+};
 
-  return uniqueDates.map((date) => ({
-    name: date,
-    data: activityNames.map((activity) => {
-      const record = data.activities[activity]?.find((r) => parseDate(r.date).formatted === date);
-      let yValue = null;
-      if (record) {
-        if (record.status === "accomplished") yValue = 1;
-        else if (record.status === "failed") yValue = 0;
-        else if (record.status === "regular") yValue = 0.5;
-      }
-      return { x: activity, y: yValue };
-    }),
+const mapStatusToValue = (status) => {
+  switch (status) {
+    case "accomplished": return 1;
+    case "failed": return 0;
+    case "regular": return 0.5;
+    default: return null;
+  }
+};
+
+const generateChartData = (records) => {
+  const uniqueDates = Object.keys(records).sort();
+  const activityNames = [...new Set(Object.values(records).flatMap(Object.keys))];
+
+  return activityNames.map((activity) => ({
+    name: activity,
+    data: uniqueDates.map((date) => ({ x: date, y: mapStatusToValue(records[date][activity]) || 0 }))
   }));
 };
 
 const ApexChartMobile = () => {
-  const [chartData, setChartData] = useState({ series: [], options: {} });
-  const [quarter, setQuarter] = useState(1);
+  const [charts, setCharts] = useState({});
+  const [selectedQuarter, setSelectedQuarter] = useState("Q1");
 
   useEffect(() => {
     fetch(API_URL)
       .then((response) => response.json())
       .then((data) => {
-        const series = transformData(data, quarter);
+        const transformedData = transformData(data);
+        const chartConfigs = {};
 
-        setChartData({
-          series,
-          options: {
-            chart: {
-              height: 600,
-              width: 500,
-              type: "heatmap",
-            },
-            plotOptions: {
-              heatmap: {
-                shadeIntensity: 0.5,
-                radius: 0,
-                useFillColorAsStroke: true,
-                colorScale: {
-                  ranges: [
-                    { from: 0, to: 0, name: "Failed", color: "#FF0000" },
-                    { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
-                    { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
-                  ],
+        Object.entries(transformedData).forEach(([month, records]) => {
+          chartConfigs[month] = {
+            series: generateChartData(records),
+            options: {
+              chart: { height: 600, type: "heatmap" },
+              plotOptions: {
+                heatmap: {
+                  shadeIntensity: 0.5,
+                  radius: 0,
+                  useFillColorAsStroke: true,
+                  colorScale: {
+                    ranges: [
+                      { from: 0, to: 0, name: "Failed", color: "#FF0000" },
+                      { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
+                      { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
+                    ],
+                  },
                 },
               },
+              dataLabels: { enabled: false },
+              title: { text: `Activity Heatmap - ${month}` },
+              xaxis: { type: "category", title: { text: "Dates" } },
+              yaxis: { title: { text: "Activities" } },
             },
-            dataLabels: { enabled: false },
-            title: { text: `Activity HeatMap - Q${quarter}` },
-            xaxis: {
-              type: "category",
-              title: { text: "Activities" },
-              position: "top",
-              labels: { rotate: -90, style: { fontSize: "14px", fontWeight: 600 } },
-            },
-            yaxis: {
-              title: { text: "Dates" },
-              opposite: true,
-              labels: { style: { fontSize: "14px", fontWeight: 600 } },
-            },
-            grid: { padding: { right: 5, left: 5 } },
-          },
+          };
         });
+        setCharts(chartConfigs);
       })
       .catch((error) => console.error("Error fetching data:", error));
-  }, [quarter]);
+  }, []);
+
+  const getQuarterMonths = (quarter) => {
+    switch (quarter) {
+      case "Q1": return ["01", "02", "03"];
+      case "Q2": return ["04", "05", "06"];
+      case "Q3": return ["07", "08", "09"];
+      case "Q4": return ["10", "11", "12"];
+      default: return [];
+    }
+  };
 
   return (
     <div>
       <h2>Activity Heatmap</h2>
-      <label htmlFor="quarterSelect">Select Quarter:</label>
-      <select id="quarterSelect" value={quarter} onChange={(e) => setQuarter(Number(e.target.value))}>
-        <option value={1}>Q1 (Jan - Mar)</option>
-        <option value={2}>Q2 (Apr - Jun)</option>
-        <option value={3}>Q3 (Jul - Sep)</option>
-        <option value={4}>Q4 (Oct - Dec)</option>
+      <select value={selectedQuarter} onChange={(e) => setSelectedQuarter(e.target.value)}>
+        <option value="Q1">Q1 (Jan - Mar)</option>
+        <option value="Q2">Q2 (Apr - Jun)</option>
+        <option value="Q3">Q3 (Jul - Sep)</option>
+        <option value="Q4">Q4 (Oct - Dec)</option>
       </select>
-      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={600} width={500} />
+      {Object.entries(charts)
+        .filter(([month]) => getQuarterMonths(selectedQuarter).includes(month.split("-")[1]))
+        .map(([month, config]) => (
+          <div key={month}>
+            <h3>{month}</h3>
+            <ReactApexChart options={config.options} series={config.series} type="heatmap" height={600} />
+          </div>
+        ))}
     </div>
   );
 };
