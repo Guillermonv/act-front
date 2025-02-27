@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 
-const API_URL = "https://activit.free.beeceptor.com/api/v3/activities";
+const API_URL = "https://activity1.free.beeceptor.com/api/v3/activities";
 
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);
@@ -14,7 +14,7 @@ const transformData = (data) => {
 
   activityNames.forEach((activity) => {
     data.activities[activity].forEach((record) => {
-      const { year, month, day, formatted } = parseDate(record.date);
+      const { year, month, formatted } = parseDate(record.date);
       const key = `${year}-${month.toString().padStart(2, "0")}`;
       
       if (!recordsByMonth[key]) recordsByMonth[key] = {};
@@ -22,7 +22,6 @@ const transformData = (data) => {
       recordsByMonth[key][formatted][activity] = record.status;
     });
   });
-
   return recordsByMonth;
 };
 
@@ -41,12 +40,13 @@ const generateChartData = (records) => {
 
   return activityNames.map((activity) => ({
     name: activity,
-    data: uniqueDates.map((date) => ({ x: date, y: mapStatusToValue(records[date][activity]) }))
+    data: uniqueDates.map((date) => ({ x: date, y: mapStatusToValue(records[date][activity]) || 0 }))
   }));
 };
 
-const ApexChart = () => {
+const ApexChartMobile = () => {
   const [charts, setCharts] = useState({});
+  const [selectedQuarter, setSelectedQuarter] = useState("Q1");
 
   useEffect(() => {
     fetch(API_URL)
@@ -81,23 +81,40 @@ const ApexChart = () => {
             },
           };
         });
-
         setCharts(chartConfigs);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
+  const getQuarterMonths = (quarter) => {
+    switch (quarter) {
+      case "Q1": return ["01", "02", "03"];
+      case "Q2": return ["04", "05", "06"];
+      case "Q3": return ["07", "08", "09"];
+      case "Q4": return ["10", "11", "12"];
+      default: return [];
+    }
+  };
+
   return (
     <div>
       <h2>Activity Heatmap</h2>
-      {Object.entries(charts).map(([month, config]) => (
-        <div key={month}>
-          <h3>{month}</h3>
-          <ReactApexChart options={config.options} series={config.series} type="heatmap" height={600} />
-        </div>
-      ))}
+      <select value={selectedQuarter} onChange={(e) => setSelectedQuarter(e.target.value)}>
+        <option value="Q1">Q1 (Jan - Mar)</option>
+        <option value="Q2">Q2 (Apr - Jun)</option>
+        <option value="Q3">Q3 (Jul - Sep)</option>
+        <option value="Q4">Q4 (Oct - Dec)</option>
+      </select>
+      {Object.entries(charts)
+        .filter(([month]) => getQuarterMonths(selectedQuarter).includes(month.split("-")[1]))
+        .map(([month, config]) => (
+          <div key={month}>
+            <h3>{month}</h3>
+            <ReactApexChart options={config.options} series={config.series} type="heatmap" height={600} />
+          </div>
+        ))}
     </div>
   );
 };
 
-export default ApexChart;
+export default ApexChartMobile;
