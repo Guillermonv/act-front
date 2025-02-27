@@ -8,34 +8,19 @@ const parseDate = (dateStr) => {
   return { year, month, day, formatted: `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}` };
 };
 
-const getQuarter = (month) => {
-  if (month >= 1 && month <= 3) return 1;
-  if (month >= 4 && month <= 6) return 2;
-  if (month >= 7 && month <= 9) return 3;
-  return 4;
-};
-
-const transformData = (data, selectedQuarter) => {
+const transformData = (data, quarter) => {
   const activityNames = Object.keys(data.activities);
-  const uniqueDates = [];
-  const filteredData = [];
+  const filteredDates = Object.values(data.activities)
+    .flatMap((records) => records.map(({ date }) => parseDate(date)))
+    .filter(({ month }) => Math.ceil(month / 3) === quarter)
+    .sort((a, b) => a.formatted.localeCompare(b.formatted));
 
-  activityNames.forEach((activity) => {
-    data.activities[activity].forEach((record) => {
-      const { year, month, formatted } = parseDate(record.date);
-      if (getQuarter(month) === selectedQuarter) {
-        if (!uniqueDates.includes(formatted)) uniqueDates.push(formatted);
-        filteredData.push({ activity, date: formatted, status: record.status });
-      }
-    });
-  });
-  
-  uniqueDates.sort();
+  const uniqueDates = [...new Set(filteredDates.map(({ formatted }) => formatted))];
 
   return uniqueDates.map((date) => ({
     name: date,
     data: activityNames.map((activity) => {
-      const record = filteredData.find((r) => r.activity === activity && r.date === date);
+      const record = data.activities[activity]?.find((r) => parseDate(r.date).formatted === date);
       let yValue = null;
       if (record) {
         if (record.status === "accomplished") yValue = 1;
@@ -49,18 +34,22 @@ const transformData = (data, selectedQuarter) => {
 
 const ApexChartMobile = () => {
   const [chartData, setChartData] = useState({ series: [], options: {} });
-  const [selectedQuarter, setSelectedQuarter] = useState(1);
+  const [quarter, setQuarter] = useState(1);
 
   useEffect(() => {
     fetch(API_URL)
       .then((response) => response.json())
       .then((data) => {
-        const series = transformData(data, selectedQuarter);
+        const series = transformData(data, quarter);
 
         setChartData({
           series,
           options: {
-            chart: { height: 600, width: 500, type: "heatmap" },
+            chart: {
+              height: 600,
+              width: 500,
+              type: "heatmap",
+            },
             plotOptions: {
               heatmap: {
                 shadeIntensity: 0.5,
@@ -76,32 +65,34 @@ const ApexChartMobile = () => {
               },
             },
             dataLabels: { enabled: false },
-            title: { text: `Activity HeatMap - Q${selectedQuarter}` },
+            title: { text: `Activity HeatMap - Q${quarter}` },
             xaxis: {
               type: "category",
               title: { text: "Activities" },
-              labels: { rotate: -90 },
+              position: "top",
+              labels: { rotate: -90, style: { fontSize: "14px", fontWeight: 600 } },
             },
             yaxis: {
               title: { text: "Dates" },
               opposite: true,
               labels: { style: { fontSize: "14px", fontWeight: 600 } },
             },
+            grid: { padding: { right: 5, left: 5 } },
           },
         });
       })
       .catch((error) => console.error("Error fetching data:", error));
-  }, [selectedQuarter]);
+  }, [quarter]);
 
   return (
     <div>
       <h2>Activity Heatmap</h2>
-      <label>Select Quarter:</label>
-      <select onChange={(e) => setSelectedQuarter(Number(e.target.value))} value={selectedQuarter}>
-        <option value={1}>Q1 (Jan-Mar)</option>
-        <option value={2}>Q2 (Apr-Jun)</option>
-        <option value={3}>Q3 (Jul-Sep)</option>
-        <option value={4}>Q4 (Oct-Dec)</option>
+      <label htmlFor="quarterSelect">Select Quarter:</label>
+      <select id="quarterSelect" value={quarter} onChange={(e) => setQuarter(Number(e.target.value))}>
+        <option value={1}>Q1 (Jan - Mar)</option>
+        <option value={2}>Q2 (Apr - Jun)</option>
+        <option value={3}>Q3 (Jul - Sep)</option>
+        <option value={4}>Q4 (Oct - Dec)</option>
       </select>
       <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={600} width={500} />
     </div>
