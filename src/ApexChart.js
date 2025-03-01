@@ -40,7 +40,10 @@ const generateChartData = (records) => {
 
   return activityNames.map((activity) => ({
     name: activity,
-    data: uniqueDates.map((date) => ({ x: date, y: mapStatusToValue(records[date][activity]) || 0 }))
+    data: uniqueDates.map((date) => {
+      const status = records[date][activity];
+      return { x: date, y: mapStatusToValue(status) || 0 };
+    })
   }));
 };
 
@@ -78,6 +81,15 @@ const ApexChart = () => {
               title: { text: `Activity Heatmap - ${month}` },
               xaxis: { type: "category", title: { text: "Dates" } },
               yaxis: { title: { text: "Activities" } },
+              // Ajuste de las dimensiones de los rectángulos para que sean cuadrados
+              grid: {
+                padding: {
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0
+                },
+              },
             },
           };
         });
