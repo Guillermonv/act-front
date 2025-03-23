@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 
-const API_URL = "https://blockchainprovider.free.beeceptor.com/api/v3/activities";
+const API_URL = "https://activit.free.beeceptor.com/api/v3/activities";
 
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);
-  return { year, month, day, formatted: `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}` };
+  return { 
+    year, 
+    month, 
+    day, 
+    formatted: `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}` 
+  };
 };
 
 const transformData = (data) => {
@@ -14,12 +19,12 @@ const transformData = (data) => {
 
   activityNames.forEach((activity) => {
     data.activities[activity].forEach((record) => {
-      const { year, month, formatted } = parseDate(record.date);
-      const key = `${year}-${month.toString().padStart(2, "0")}`;
+      const { year, month, day, formatted } = parseDate(record.date);
+      const monthKey = `${year}-${month.toString().padStart(2, "0")}`;
 
-      if (!recordsByMonth[key]) recordsByMonth[key] = {};
-      if (!recordsByMonth[key][formatted]) recordsByMonth[key][formatted] = {};
-      recordsByMonth[key][formatted][activity] = record.status;
+      if (!recordsByMonth[monthKey]) recordsByMonth[monthKey] = {};
+      if (!recordsByMonth[monthKey][formatted]) recordsByMonth[monthKey][formatted] = {};
+      recordsByMonth[monthKey][formatted][activity] = record.status;
     });
   });
   return recordsByMonth;
@@ -52,6 +57,12 @@ const ApexChart = () => {
   const [selectedMonth, setSelectedMonth] = useState("01");
 
   useEffect(() => {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const maxCellSize = 100;
+    const minCellSize = 50;
+    const baseSize = Math.max(Math.min(screenWidth / 40, screenHeight / 25, maxCellSize), minCellSize);
+
     fetch(API_URL)
       .then((response) => response.json())
       .then((data) => {
@@ -62,12 +73,10 @@ const ApexChart = () => {
           const uniqueDates = Object.keys(records).sort();
           const activityNames = [...new Set(Object.values(records).flatMap(Object.keys))];
 
-          const numRows = activityNames.length; 
+          const numRows = activityNames.length;
           const numCols = uniqueDates.length;
 
-          // Tamaño base del gráfico (Doble de grande)
-          const baseSize =55; // Cada celda ahora es más grande
-          const chartHeight = numRows * baseSize; 
+          const chartHeight = numRows * baseSize;
           const chartWidth = numCols * baseSize;
 
           chartConfigs[month] = {
@@ -81,16 +90,25 @@ const ApexChart = () => {
                   useFillColorAsStroke: false,
                   colorScale: {
                     ranges: [
-                      { from: 0, to: 0, name: "Failed", color: "#FF0000" }, // Rojo
-                      { from: 1, to: 1, name: "Accomplished", color: "#00A100" }, // Verde
-                      { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" }, // Amarillo
+                      { from: 0, to: 0, name: "Failed", color: "#FF0000" },
+                      { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
+                      { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
                     ],
                   },
                 },
               },
               dataLabels: { enabled: false },
               title: { text: `Activity Heatmap - ${month}` },
-              xaxis: { type: "category", title: { text: "Dates" } },
+              xaxis: { 
+                type: "category", 
+                title: { text: "Dates" },
+                labels: {
+                  formatter: (value) => {
+                    const day = value.substring(8, 10); // Extrae solo el día de "YYYY-MM-DD"
+                    return day;
+                  }
+                }
+              },
               yaxis: { title: { text: "Activities" } },
             },
           };
@@ -119,7 +137,13 @@ const ApexChart = () => {
         .map(([month, config]) => (
           <div key={month}>
             <h3>{month}</h3>
-            <ReactApexChart options={config.options} series={config.series} type="heatmap" height={config.options.chart.height} width={config.options.chart.width} />
+            <ReactApexChart 
+              options={config.options} 
+              series={config.series} 
+              type="heatmap" 
+              height={config.options.chart.height} 
+              width={config.options.chart.width} 
+            />
           </div>
         ))}
     </div>
