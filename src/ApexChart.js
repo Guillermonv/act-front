@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 
-const API_URL = "https://activity1.free.beeceptor.com/api/v3/activities";
+const API_URL = "https://activit.free.beeceptor.com/api/v3/activities";
 
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);
-  return { year, month, day, formatted: `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}` };
+  return { 
+    year, 
+    month, 
+    day, 
+    formatted: `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}` 
+  };
 };
 
 const transformData = (data) => {
@@ -14,12 +19,12 @@ const transformData = (data) => {
 
   activityNames.forEach((activity) => {
     data.activities[activity].forEach((record) => {
-      const { year, month, formatted } = parseDate(record.date);
-      const key = `${year}-${month.toString().padStart(2, "0")}`;
-      
-      if (!recordsByMonth[key]) recordsByMonth[key] = {};
-      if (!recordsByMonth[key][formatted]) recordsByMonth[key][formatted] = {};
-      recordsByMonth[key][formatted][activity] = record.status;
+      const { year, month, day, formatted } = parseDate(record.date);
+      const monthKey = `${year}-${month.toString().padStart(2, "0")}`;
+
+      if (!recordsByMonth[monthKey]) recordsByMonth[monthKey] = {};
+      if (!recordsByMonth[monthKey][formatted]) recordsByMonth[monthKey][formatted] = {};
+      recordsByMonth[monthKey][formatted][activity] = record.status;
     });
   });
   return recordsByMonth;
@@ -49,9 +54,15 @@ const generateChartData = (records) => {
 
 const ApexChart = () => {
   const [charts, setCharts] = useState({});
-  const [selectedQuarter, setSelectedQuarter] = useState("Q1");
+  const [selectedMonth, setSelectedMonth] = useState("01");
 
   useEffect(() => {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const maxCellSize = 100;
+    const minCellSize = 50;
+    const baseSize = Math.max(Math.min(screenWidth / 40, screenHeight / 25, maxCellSize), minCellSize);
+
     fetch(API_URL)
       .then((response) => response.json())
       .then((data) => {
@@ -59,15 +70,24 @@ const ApexChart = () => {
         const chartConfigs = {};
 
         Object.entries(transformedData).forEach(([month, records]) => {
+          const uniqueDates = Object.keys(records).sort();
+          const activityNames = [...new Set(Object.values(records).flatMap(Object.keys))];
+
+          const numRows = activityNames.length;
+          const numCols = uniqueDates.length;
+
+          const chartHeight = numRows * baseSize;
+          const chartWidth = numCols * baseSize;
+
           chartConfigs[month] = {
             series: generateChartData(records),
             options: {
-              chart: { height: 600, type: "heatmap" },
+              chart: { height: chartHeight, width: chartWidth, type: "heatmap" },
               plotOptions: {
                 heatmap: {
-                  shadeIntensity: 0.5,
+                  shadeIntensity: 0.7,
                   radius: 0,
-                  useFillColorAsStroke: true,
+                  useFillColorAsStroke: false,
                   colorScale: {
                     ranges: [
                       { from: 0, to: 0, name: "Failed", color: "#FF0000" },
@@ -79,50 +99,51 @@ const ApexChart = () => {
               },
               dataLabels: { enabled: false },
               title: { text: `Activity Heatmap - ${month}` },
-              xaxis: { type: "category", title: { text: "Dates" } },
-              yaxis: { title: { text: "Activities" } },
-              // Ajuste de las dimensiones de los rectángulos para que sean cuadrados
-              grid: {
-                padding: {
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0
-                },
+              xaxis: { 
+                type: "category", 
+                title: { text: "Dates" },
+                labels: {
+                  formatter: (value) => {
+                    const day = value.substring(8, 10); // Extrae solo el día de "YYYY-MM-DD"
+                    return day;
+                  }
+                }
               },
+              yaxis: { title: { text: "Activities" } },
             },
           };
         });
+
         setCharts(chartConfigs);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
-  const getQuarterMonths = (quarter) => {
-    switch (quarter) {
-      case "Q1": return ["01", "02", "03"];
-      case "Q2": return ["04", "05", "06"];
-      case "Q3": return ["07", "08", "09"];
-      case "Q4": return ["10", "11", "12"];
-      default: return [];
-    }
-  };
-
   return (
     <div>
       <h2>Activity Heatmap</h2>
-      <select value={selectedQuarter} onChange={(e) => setSelectedQuarter(e.target.value)}>
-        <option value="Q1">Q1 (Jan - Mar)</option>
-        <option value="Q2">Q2 (Apr - Jun)</option>
-        <option value="Q3">Q3 (Jul - Sep)</option>
-        <option value="Q4">Q4 (Oct - Dec)</option>
+      <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+        {Array.from({ length: 12 }, (_, i) => {
+          const month = (i + 1).toString().padStart(2, "0");
+          return (
+            <option key={month} value={month}>
+              {new Date(2024, i).toLocaleString("default", { month: "long" })}
+            </option>
+          );
+        })}
       </select>
       {Object.entries(charts)
-        .filter(([month]) => getQuarterMonths(selectedQuarter).includes(month.split("-")[1]))
+        .filter(([month]) => month.split("-")[1] === selectedMonth)
         .map(([month, config]) => (
           <div key={month}>
             <h3>{month}</h3>
-            <ReactApexChart options={config.options} series={config.series} type="heatmap" height={600} />
+            <ReactApexChart 
+              options={config.options} 
+              series={config.series} 
+              type="heatmap" 
+              height={config.options.chart.height} 
+              width={config.options.chart.width} 
+            />
           </div>
         ))}
     </div>
