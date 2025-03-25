@@ -3,19 +3,26 @@ import ReactApexChart from "react-apexcharts";
 
 const API_URL = "https://activity1.free.beeceptor.com/api/v3/activities";
 
+// Función para parsear la fecha y mantenerla original
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);
-  return `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+  // Se mantiene el formato original para la fecha completa
+  return { day, month, year, formatted: `${day.toString().padStart(2, "0")}-${month.toString().padStart(2, "0")}-${year}` };
 };
 
+// Transformar datos en series adecuadas para ApexCharts
 const transformData = (data) => {
-  const activityNames = Object.keys(data.activities);
-  const uniqueDates = [...new Set(Object.values(data.activities).flatMap((records) => records.map(({ date }) => parseDate(date))))].sort();
+  if (!data.activities) return [];
 
-  return uniqueDates.map((date) => ({
-    name: date,
+  const activityNames = Object.keys(data.activities);
+  const uniqueDates = [
+    ...new Set(Object.values(data.activities).flatMap((records) => records.map(({ date }) => parseDate(date).day))) // Usamos solo el día para el gráfico
+  ].sort((a, b) => a - b);
+
+  return uniqueDates.map((day) => ({
+    name: day.toString(), // Día en el eje Y
     data: activityNames.map((activity) => {
-      const record = data.activities[activity]?.find((r) => parseDate(r.date) === date);
+      const record = data.activities[activity]?.find((r) => parseDate(r.date).day === day);
       let yValue = null;
       if (record) {
         if (record.status === "accomplished") yValue = 1;
@@ -35,18 +42,22 @@ const ApexChartMobile = () => {
       .then((response) => response.json())
       .then((data) => {
         const series = transformData(data);
+        if (series.length === 0) return;
+
+        const numRows = series.length; // Cantidad de días
+        const numCols = series[0]?.data.length || 0; // Cantidad de actividades
+
+        const cellSize = 50; // Tamaño de cada celda
+        const chartHeight = numRows * cellSize;
+        const chartWidth = numCols * cellSize;
 
         setChartData({
           series,
           options: {
-            chart: {
-              height: 10600,
-              width: 500,
-              type: "heatmap",
-            },
+            chart: { height: chartHeight, width: chartWidth, type: "heatmap" },
             plotOptions: {
               heatmap: {
-                shadeIntensity: 0.5,
+                shadeIntensity: 0.7,
                 radius: 0,
                 useFillColorAsStroke: true,
                 colorScale: {
@@ -58,37 +69,22 @@ const ApexChartMobile = () => {
                 },
               },
             },
-            dataLabels: {
-              enabled: false,
-            },
-            title: {
-              text: "Activity HeatMap",
-            },
+            dataLabels: { enabled: false },
+            title: { text: "Activity HeatMap" },
             xaxis: {
               type: "category",
               title: { text: "Activities" },
-              position: "top", // Mueve las actividades arriba
+              position: "top",
               labels: {
-                rotate: -90, // Gira los nombres para mejor visibilidad
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                },
+                rotate: -90,
+                style: { fontSize: "14px", fontWeight: 600 },
               },
             },
             yaxis: {
-              title: { text: "Dates" },
-              opposite: false, // Ahora los días aparecen a la izquierda
-              labels: {
-                style: {
-                  fontSize: "14px",
-                  fontWeight: 600,
-                },
-              },
+              title: { text: "Days" },
+              labels: { style: { fontSize: "14px", fontWeight: 600 } },
             },
-            grid: {
-              padding: { right: 5, left: 5 },
-            },
+            grid: { padding: { right: 5, left: 5 } },
           },
         });
       })
@@ -98,7 +94,17 @@ const ApexChartMobile = () => {
   return (
     <div>
       <h2>Activity Heatmap</h2>
-      <ReactApexChart options={chartData.options} series={chartData.series} type="heatmap" height={10600} width={500} />
+      {chartData.series.length > 0 ? (
+        <ReactApexChart
+          options={chartData.options}
+          series={chartData.series}
+          type="heatmap"
+          height={chartData.options.chart.height}
+          width={chartData.options.chart.width}
+        />
+      ) : (
+        <p>Loading data...</p>
+      )}
     </div>
   );
 };
