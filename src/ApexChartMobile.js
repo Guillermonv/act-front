@@ -67,7 +67,7 @@ const ApexChartMobile = () => {
           series,
           options: {
             chart: {
-              height: 10600,
+              height: 1000,
               width: 500,
               type: "heatmap",
             },
