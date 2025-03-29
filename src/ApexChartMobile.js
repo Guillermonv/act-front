@@ -1,26 +1,26 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
+import "@fontsource/inter";
+import "@fontsource/roboto";
+import "@fontsource/poppins";
 
-const API_URL = "https://activit.free.beeceptor.com/api/v3/activities";
+const API_URL = "https://blockchainprovider.free.beeceptor.com/api/v3/activities";
 
-// Función para parsear la fecha en formato MM-DD
 const parseDate = (dateStr) => {
-  if (!dateStr || typeof dateStr !== "string") return null; // Evita errores
+  if (!dateStr || typeof dateStr !== "string") return null;
   const [day, month] = dateStr.split("-").map(Number);
-  if (!day || !month) return null; // Verifica que sean números válidos
+  if (!day || !month) return null;
   return `${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
 };
 
-// Función para formatear las fechas en el eje Y
 const formatDateForYAxis = (dateStr) => {
-  if (!dateStr || typeof dateStr !== "string") return ""; // Devuelve vacío en vez de "N/A"
+  if (!dateStr || typeof dateStr !== "string") return "";
   const [month, day] = dateStr.split("-");
   return month && day ? `${month}-${day}` : "";
 };
 
-// Transforma los datos para el heatmap
 const transformData = (data) => {
-  console.log("API response:", data); // Para depuración
+  console.log("API response:", data);
 
   if (!data || !data.activities) return [];
 
@@ -28,7 +28,7 @@ const transformData = (data) => {
   const uniqueDates = [...new Set(
     Object.values(data.activities)
       .flatMap((records) => records.map(({ date }) => parseDate(date)))
-      .filter(Boolean) // FILTRA valores nulos o inválidos
+      .filter(Boolean)
   )].sort();
 
   return uniqueDates.map((date) => ({
@@ -38,17 +38,19 @@ const transformData = (data) => {
         const records = data.activities[activity] || [];
         const record = records.find((r) => parseDate(r.date) === date);
 
-        if (!record) return null; // No agrega si no hay datos válidos
+        if (!record) return null;
 
         let yValue = null;
         if (record.status === "accomplished") yValue = 1;
-        else if (record.status === "failed") yValue = 0;
+        else if (record.status === "suck") yValue = 0;
         else if (record.status === "regular") yValue = 0.5;
+        else if (record.status === "failed") yValue = 0.2;
+        else if (record.status === "excellence") yValue = 1.2;
 
         return yValue !== null ? { x: activity, y: yValue } : null;
       })
-      .filter(Boolean), // FILTRA valores nulos
-  })).filter((series) => series.data.length > 0); // Elimina series vacías
+      .filter(Boolean),
+  })).filter((series) => series.data.length > 0);
 };
 
 const ApexChartMobile = () => {
@@ -59,7 +61,7 @@ const ApexChartMobile = () => {
       .then((response) => response.json())
       .then((data) => {
         const series = transformData(data);
-        console.log("Series final:", series); // Verificar si hay undefined
+        console.log("Series final:", series);
 
         setChartData({
           series,
@@ -76,9 +78,11 @@ const ApexChartMobile = () => {
                 useFillColorAsStroke: false,
                 colorScale: {
                   ranges: [
-                    { from: 0, to: 0, name: "Failed", color: "#FF0000" },
-                    { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
+                    { from: 0, to: 0, name: "Suck", color: "#000000" },
+                    { from: 0.2, to: 0.2, name: "Failed", color: "#FF0000" },
                     { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
+                    { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
+                    { from: 1.2, to: 1.2, name: "Excellence", color: "#0000FF" },
                   ],
                 },
               },
@@ -94,20 +98,22 @@ const ApexChartMobile = () => {
                 style: {
                   fontSize: "14px",
                   fontWeight: 600,
+                  fontFamily: "Poppins, sans-serif",
                 },
               },
             },
             yaxis: {
-              title: { text: "Dates" },
+              title: { text: "Dates", style: { fontFamily: "Roboto, sans-serif" } },
               opposite: false,
               labels: {
                 formatter: (value) => {
-                  console.log("y-axis value:", value); // Depuración
+                  console.log("y-axis value:", value);
                   return formatDateForYAxis(value);
                 },
                 style: {
                   fontSize: "14px",
                   fontWeight: 600,
+                  fontFamily: "Inter, sans-serif",
                 },
               },
             },
