@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import StatusModal from "./form/StatusModal";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
-const API_URL = "https://blockchainprovider.free.beeceptor.com/api/v3/activities";
+const API_URL = "https://demoguille.free.beeceptor.com/api/v3/activities";
 
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);
@@ -83,17 +84,25 @@ const ApexChart = () => {
   };
 
   return (
-    <div>
-      <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
-        {Array.from({ length: 12 }, (_, i) => {
-          const month = (i + 1).toString().padStart(2, "0");
-          return (
-            <option key={month} value={month}>
-              {new Date(2024, i).toLocaleString("default", { month: "long" })}
-            </option>
-          );
-        })}
-      </select>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <br />
+      <br />
+
+      <div>
+        <FormControl variant="outlined" style={{ minWidth: 150, marginRight: 0 }}>
+          <InputLabel>Mes</InputLabel>
+          <Select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} label="Mes">
+            {Array.from({ length: 12 }, (_, i) => {
+              const month = (i + 1).toString().padStart(2, "0");
+              return (
+                <MenuItem key={month} value={month}>
+                  {new Date(2024, i).toLocaleString("default", { month: "long" })}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
+      </div>
 
       {charts[selectedMonth] && (
         <ReactApexChart
@@ -101,11 +110,11 @@ const ApexChart = () => {
             chart: { type: "heatmap", events: { dataPointSelection: handleCellClick } },
             plotOptions: {
               heatmap: {
-                shadeIntensity: 0.7,
+                shadeIntensity: 0.5,
                 radius: 0,
                 colorScale: {
                   ranges: [
-                    { from: 0, to: 0, name: "Suck", color: "#000000zs" },
+                    { from: 0, to: 0, name: "Suck", color: "#000000" },
                     { from: 0.2, to: 0.2, name: "Failed", color: "#FF0000" },
                     { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
                     { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
@@ -115,12 +124,18 @@ const ApexChart = () => {
               },
             },
             dataLabels: { enabled: false },
-            xaxis: { type: "category", title: { text: "Dates" } },
-            yaxis: { title: { text: "Activities" } },
+            xaxis: {
+              type: "category",
+              labels: {
+                formatter: (value) => new Date(value).getDate(),
+              },
+            },
+            yaxis: { title: { text: "" } },
           }}
           series={charts[selectedMonth].series}
           type="heatmap"
           height={400}
+          width={2000}
         />
       )}
 
