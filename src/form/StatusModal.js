@@ -43,7 +43,7 @@ const StatusModal = ({ selectedCell, setSelectedCell }) => {
       <Box
         sx={{
           p: 7,
-          bgcolor: "grey",
+          bgcolor: "#F5F5DC",
           borderRadius: 2,
           boxShadow: 0,
           width: "90vw", // Se adapta al tamaño de la pantalla
