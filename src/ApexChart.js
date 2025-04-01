@@ -3,7 +3,7 @@ import ReactApexChart from "react-apexcharts";
 import StatusModal from "./form/StatusModal";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
-const API_URL = "https://demoguille.free.beeceptor.com/api/v3/activities";
+const API_URL = "https://blockchainprovider.free.beeceptor.com/api/v3/activities";
 
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);
@@ -26,7 +26,7 @@ const mapStatusToValue = (status) => {
   const statusMap = {
     failed: 0.2,
     regular: 0.5,
-    suck: 0,
+    suck: 0.001, // En vez de 0, usamos un valor pequeño
     accomplished: 1,
     excellence: 1.2,
   };
@@ -84,26 +84,48 @@ const ApexChart = () => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
       <br />
       <br />
+      {/* Contenedor para el Selector y las Leyendas */}
+      <div style={{ display: "flex", width: "100%" }}>
+        <div style={{ display: "flex", marginLeft: "22%" }}>
+          {/* Este es el div con el contenido alineado a la izquierda con un margen de 7% */}
+          <FormControl variant="outlined" style={{ minWidth: 150 }}>
+            <InputLabel>Mes</InputLabel>
+            <Select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} label="Mes">
+              {Array.from({ length: 12 }, (_, i) => {
+                const month = (i + 1).toString().padStart(2, "0");
+                return (
+                  <MenuItem key={month} value={month}>
+                    {new Date(2024, i).toLocaleString("default", { month: "long" })}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
+        </div>
 
-      <div>
-        <FormControl variant="outlined" style={{ minWidth: 150, marginRight: 0 }}>
-          <InputLabel>Mes</InputLabel>
-          <Select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} label="Mes">
-            {Array.from({ length: 12 }, (_, i) => {
-              const month = (i + 1).toString().padStart(2, "0");
-              return (
-                <MenuItem key={month} value={month}>
-                  {new Date(2024, i).toLocaleString("default", { month: "long" })}
-                </MenuItem>
-              );
-            })}
-          </Select>
-        </FormControl>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px" ,marginRight: "22%" }}>
+          <span style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Suck
+          </span>
+          <span style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed
+          </span>
+          <span style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular
+          </span>
+          <span style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished
+          </span>
+          <span style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence
+          </span>
+        </div>
       </div>
 
+      {/* Heatmap */}
       {charts[selectedMonth] && (
         <ReactApexChart
           options={{
@@ -114,14 +136,20 @@ const ApexChart = () => {
                 radius: 0,
                 colorScale: {
                   ranges: [
-                    { from: 0, to: 0, name: "Suck", color: "#000000" },
+                    { from: 0.001, to: 0.001, name: "Suck", color: "#000000" }, // Ajustamos para detectar el nuevo valor
                     { from: 0.2, to: 0.2, name: "Failed", color: "#FF0000" },
                     { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
                     { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
                     { from: 1.2, to: 1.2, name: "Excellence", color: "#0000FF" },
+                    { from: null, to: null, name: "No Status", color: "#FFFFFF" },
                   ],
                 },
               },
+            },
+            legend: {
+              show: false,
+              fontSize: "12px",
+              markers: { width: 10, height: 10 },
             },
             dataLabels: { enabled: false },
             xaxis: {
