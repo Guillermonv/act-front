@@ -3,7 +3,7 @@ import ReactApexChart from "react-apexcharts";
 import StatusModal from "./form/StatusModal";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
-const API_URL = "https://blockchainprovider.free.beeceptor.com/api/v3/activities";
+const API_URL = "http://localhost:8080/activities/grouped";
 
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);
