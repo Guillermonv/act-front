@@ -63,7 +63,7 @@ const StatusModal = ({ selectedCell, setSelectedCell, refreshData }) => {
       <Box
         sx={{
           p: 7,
-          bgcolor: "#F5F5DC",
+          bgcolor: "#FFFFFF",
           borderRadius: 2,
           boxShadow: 0,
           width: "90vw",
@@ -73,7 +73,6 @@ const StatusModal = ({ selectedCell, setSelectedCell, refreshData }) => {
           mt: 18,
           display: "flex",
           flexDirection: "column",
-          gap: 1,
           fontFamily: "Arial, sans-serif",
         }}
       >
@@ -92,7 +91,7 @@ const StatusModal = ({ selectedCell, setSelectedCell, refreshData }) => {
           marks={statusLevels.map(({ value, label, color }) => ({
             value,
             label: (
-              <span style={{ color: color, fontSize: "1.2rem", fontWeight: "bold" }}>
+              <span style={{ color: "#000000", fontSize: "1.2rem", fontWeight: "bold" }}>
                 {label}
               </span>
             ),
