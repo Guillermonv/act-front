@@ -26,10 +26,9 @@ const formatDate = (isoDate) => {
   return `${day}-${month}-${year}`;
 };
 
-const StatusModal = ({ selectedCell, setSelectedCell }) => {
+const StatusModal = ({ selectedCell, setSelectedCell, refreshData }) => {
   if (!selectedCell) return null;
 
-  // buscamos el valor decimal del status (para el slider)
   const currentValue = statusLevels.find((s) => s.label === selectedCell.status)?.value || 0.55;
 
   const handleStatusChange = (_, newValue) => {
@@ -47,9 +46,14 @@ const StatusModal = ({ selectedCell, setSelectedCell }) => {
       body: JSON.stringify({
         date: formattedDate,
         activity: selectedCell.activity,
-        status: closestStatus.label, // ✅ aseguramos que se envía el label correcto
+        status: closestStatus.label,
       }),
-    }).then(() => console.log("Updated successfully"));
+    })
+      .then(() => {
+        console.log("Updated successfully");
+        refreshData(); // 🔁 volver a cargar los datos del heatmap
+      })
+      .catch((err) => console.error("Error updating:", err));
 
     setSelectedCell(null);
   };
@@ -74,10 +78,10 @@ const StatusModal = ({ selectedCell, setSelectedCell }) => {
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-          <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.3rem", marginTop: 0 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.3rem" }}>
             <strong>Date:</strong> {formatDate(selectedCell.x)}
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.3rem", marginTop: 0 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.3rem" }}>
             <strong>Activity:</strong> {selectedCell.activity}
           </Typography>
         </Box>
