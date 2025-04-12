@@ -26,7 +26,7 @@ const mapStatusToValue = (status) => {
   const statusMap = {
     failed: 0.2,
     regular: 0.5,
-    suck: 0.001, // En vez de 0, usamos un valor pequeño
+    suck: 0.001,
     accomplished: 1,
     excellence: 1.2,
   };
@@ -38,7 +38,7 @@ const ApexChart = () => {
   const [selectedMonth, setSelectedMonth] = useState("01");
   const [selectedCell, setSelectedCell] = useState(null);
 
-  useEffect(() => {
+  const fetchData = () => {
     fetch(API_URL)
       .then((response) => response.json())
       .then((data) => {
@@ -70,6 +70,10 @@ const ApexChart = () => {
         setCharts(chartConfigs);
       })
       .catch((error) => console.error("Error fetching data:", error));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const handleCellClick = (event, chartContext, config) => {
@@ -87,10 +91,8 @@ const ApexChart = () => {
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
       <br />
       <br />
-      {/* Contenedor para el Selector y las Leyendas */}
       <div style={{ display: "flex", width: "100%" }}>
         <div style={{ display: "flex", marginLeft: "22%" }}>
-          {/* Este es el div con el contenido alineado a la izquierda con un margen de 7% */}
           <FormControl variant="outlined" style={{ minWidth: 150 }}>
             <InputLabel>Mes</InputLabel>
             <Select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} label="Mes">
@@ -107,25 +109,14 @@ const ApexChart = () => {
         </div>
 
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px" ,marginRight: "22%" }}>
-          <span style={{ display: "flex", alignItems: "center" }}>
-            <span style={{ width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Suck
-          </span>
-          <span style={{ display: "flex", alignItems: "center" }}>
-            <span style={{ width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed
-          </span>
-          <span style={{ display: "flex", alignItems: "center" }}>
-            <span style={{ width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular
-          </span>
-          <span style={{ display: "flex", alignItems: "center" }}>
-            <span style={{ width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished
-          </span>
-          <span style={{ display: "flex", alignItems: "center" }}>
-            <span style={{ width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence
-          </span>
+          <span><span style={{ width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Suck</span>
+          <span><span style={{ width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
+          <span><span style={{ width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
+          <span><span style={{ width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished</span>
+          <span><span style={{ width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence</span>
         </div>
       </div>
 
-      {/* Heatmap */}
       {charts[selectedMonth] && (
         <ReactApexChart
           options={{
@@ -136,7 +127,7 @@ const ApexChart = () => {
                 radius: 0,
                 colorScale: {
                   ranges: [
-                    { from: 0.001, to: 0.001, name: "Suck", color: "#000000" }, // Ajustamos para detectar el nuevo valor
+                    { from: 0.001, to: 0.001, name: "Suck", color: "#000000" },
                     { from: 0.2, to: 0.2, name: "Failed", color: "#FF0000" },
                     { from: 0.5, to: 0.5, name: "Regular", color: "#FFFF00" },
                     { from: 1, to: 1, name: "Accomplished", color: "#00A100" },
@@ -146,11 +137,7 @@ const ApexChart = () => {
                 },
               },
             },
-            legend: {
-              show: false,
-              fontSize: "12px",
-              markers: { width: 10, height: 10 },
-            },
+            legend: { show: false },
             dataLabels: { enabled: false },
             xaxis: {
               type: "category",
@@ -167,7 +154,7 @@ const ApexChart = () => {
         />
       )}
 
-      <StatusModal selectedCell={selectedCell} setSelectedCell={setSelectedCell} />
+      <StatusModal selectedCell={selectedCell} setSelectedCell={setSelectedCell} refreshData={fetchData} />
     </div>
   );
 };
