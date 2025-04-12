@@ -15,14 +15,12 @@ const statusLevels = [
   { value: 0.95, label: "Excellence", color: "#0000FF" },
 ];
 
-// Busca el nivel más cercano dado un valor decimal
 const getClosestStatus = (value) => {
   return statusLevels.reduce((prev, curr) =>
     Math.abs(curr.value - value) < Math.abs(prev.value - value) ? curr : prev
   );
 };
 
-// Convierte una fecha de 'yyyy-mm-dd' a 'dd-mm-yyyy'
 const formatDate = (isoDate) => {
   const [year, month, day] = isoDate.split("-");
   return `${day}-${month}-${year}`;
@@ -31,7 +29,7 @@ const formatDate = (isoDate) => {
 const StatusModal = ({ selectedCell, setSelectedCell }) => {
   if (!selectedCell) return null;
 
-  // Calculamos el valor del slider según el label actual
+  // buscamos el valor decimal del status (para el slider)
   const currentValue = statusLevels.find((s) => s.label === selectedCell.status)?.value || 0.55;
 
   const handleStatusChange = (_, newValue) => {
@@ -40,14 +38,16 @@ const StatusModal = ({ selectedCell, setSelectedCell }) => {
   };
 
   const handleSave = () => {
+    const closestStatus = getClosestStatus(currentValue);
     const formattedDate = formatDate(selectedCell.x);
+
     fetch(UPDATE_API_URL, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        date: formattedDate, // se envía en formato dd-mm-yyyy
+        date: formattedDate,
         activity: selectedCell.activity,
-        status: selectedCell.status, // Se envía el label (ej: "Suck")
+        status: closestStatus.label, // ✅ aseguramos que se envía el label correcto
       }),
     }).then(() => console.log("Updated successfully"));
 
