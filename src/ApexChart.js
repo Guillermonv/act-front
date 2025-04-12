@@ -108,8 +108,8 @@ const ApexChart = () => {
           </FormControl>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px" ,marginRight: "22%" }}>
-          <span><span style={{ width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Suck</span>
+<div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px", marginRight: "22%" }}>
+          <span><span style={{ width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Sucky</span>
           <span><span style={{ width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
           <span><span style={{ width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
           <span><span style={{ width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished</span>
@@ -150,7 +150,7 @@ const ApexChart = () => {
           series={charts[selectedMonth].series}
           type="heatmap"
           height={400}
-          width={2000}
+          width={1300}
         />
       )}
 
