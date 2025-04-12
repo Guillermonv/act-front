@@ -109,11 +109,11 @@ const ApexChart = () => {
         </div>
 
 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px", marginRight: "22%" }}>
-          <span><span style={{ width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Sucky</span>
-          <span><span style={{ width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
-          <span><span style={{ width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
-          <span><span style={{ width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished</span>
-          <span><span style={{ width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence</span>
+          <span><span style={{ display: "inline-block",width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Sucky</span>
+          <span><span style={{ display: "inline-block",width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
+          <span><span style={{display: "inline-block", width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
+          <span><span style={{ display: "inline-block",width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished</span>
+          <span><span style={{display: "inline-block", width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence</span>
         </div>
       </div>
 
@@ -143,9 +143,23 @@ const ApexChart = () => {
               type: "category",
               labels: {
                 formatter: (value) => new Date(value).getDate(),
+                style: {
+                  fontSize: "17px",
+                  fontFamily: "Arial",
+                  fontWeight: 400,
+                },
               },
             },
-            yaxis: { title: { text: "" } },
+            yaxis: {
+              title: { text: "" },
+              labels: {
+                style: {
+                  fontSize: "19x",
+                  fontFamily: "Arial",
+                  fontWeight: 400,
+                },
+              },
+            },
           }}
           series={charts[selectedMonth].series}
           type="heatmap"
