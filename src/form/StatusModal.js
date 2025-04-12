@@ -62,28 +62,20 @@ const StatusModal = ({ selectedCell, setSelectedCell, refreshData }) => {
     <Modal open={!!selectedCell} onClose={() => setSelectedCell(null)}>
       <Box
         sx={{
-          p: 7,
+          p: 8,
           bgcolor: "#FFFFFF",
-          borderRadius: 2,
-          boxShadow: 0,
-          width: "90vw",
-          maxWidth: 650,
-          maxHeight: 750,
+          borderRadius: 0,
+          boxShadow: 50,
+          maxWidth: 500,
+          maxHeight: 150,
           margin: "auto",
-          mt: 18,
           display: "flex",
+          mt: 18,
           flexDirection: "column",
           fontFamily: "Arial, sans-serif",
         }}
       >
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-          <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.3rem" }}>
-            <strong>Date:</strong> {formatDate(selectedCell.x)}
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.3rem" }}>
-            <strong>Activity:</strong> {selectedCell.activity}
-          </Typography>
-        </Box>
+      
 
         <Slider
           value={currentValue}
@@ -111,7 +103,17 @@ const StatusModal = ({ selectedCell, setSelectedCell, refreshData }) => {
           }}
         />
 
-        <br /><br />
+
+<br></br>
+<Box  justifyContent="space-between" alignItems="flex-start">
+          <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.3rem" }}>
+            <strong>Date:</strong> {formatDate(selectedCell.x)}
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.3rem" }}>
+            <strong>Activity:</strong> {selectedCell.activity}
+          </Typography>
+        </Box>
+
         <Box sx={{ flexGrow: 1 }} />
 
         <Button
