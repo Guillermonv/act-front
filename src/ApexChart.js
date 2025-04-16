@@ -163,7 +163,7 @@ const ApexChart = () => {
           }}
           series={charts[selectedMonth].series}
           type="heatmap"
-          height={400}
+          height={350}
           width={1300}
         />
       )}
