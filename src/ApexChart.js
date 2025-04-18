@@ -53,7 +53,29 @@ const ApexChart = () => {
 
         Object.keys(chartConfigs).forEach((month) => {
           const records = chartConfigs[month].records;
-          const uniqueDates = Object.keys(records).sort();
+
+          // Filtramos y ordenamos las fechas
+          const uniqueDates = Object.keys(records)
+            .filter((date) => {
+              const d = new Date(date);
+              return (d.getMonth() + 1).toString().padStart(2, "0") === month;
+            })
+            .sort();
+          
+          // Obtener el último día del mes seleccionado
+          const lastDayOfMonth = new Date(`${new Date().getFullYear()}-${month}-01`);
+          lastDayOfMonth.setMonth(lastDayOfMonth.getMonth() + 1); // Avanzamos al siguiente mes
+          lastDayOfMonth.setDate(0); // Retrocedemos un día para obtener el último día del mes seleccionado
+          
+          // Convertimos el último día en formato 'YYYY-MM-DD'
+          const lastDay = lastDayOfMonth.toISOString().split("T")[0];
+          
+          // Si el último día no está en la lista de fechas, lo agregamos al final
+          if (!uniqueDates.includes(lastDay)) {
+            uniqueDates.push(lastDay);
+          }
+          
+
           const activities = [...new Set(Object.values(records).flatMap(Object.keys))];
 
           chartConfigs[month].series = activities.map((activity) => ({
