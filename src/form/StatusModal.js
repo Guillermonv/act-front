@@ -8,11 +8,11 @@ import Button from "@mui/material/Button";
 const UPDATE_API_URL = "http://localhost:8080/activities/update";
 
 const statusLevels = [
-  { value: 0.15, label: "Suck", color: "#000000" },
-  { value: 0.35, label: "Failed", color: "#FF0000" },
-  { value: 0.55, label: "Regular", color: "#FFFF00" },
-  { value: 0.75, label: "Accomplished", color: "#00A100" },
-  { value: 0.95, label: "Excellence", color: "#0000FF" },
+  { value: 0.15, label: "suck", color: "#000000" },
+  { value: 0.35, label: "failed", color: "#FF0000" },
+  { value: 0.55, label: "regular", color: "#FFFF00" },
+  { value: 0.75, label: "accomplished", color: "#00A100" },
+  { value: 0.95, label: "esxcellence", color: "#0000FF" },
 ];
 
 const getClosestStatus = (value) => {
