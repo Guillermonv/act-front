@@ -10,6 +10,14 @@ const parseDate = (dateStr) => {
   return `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
 };
 
+const getAllDatesInMonth = (year, month) => {
+  const days = new Date(year, month, 0).getDate();
+  return Array.from({ length: days }, (_, i) => {
+    const day = (i + 1).toString().padStart(2, "0");
+    return `${year}-${month.toString().padStart(2, "0")}-${day}`;
+  });
+};
+
 const transformData = (data) => {
   const recordsByMonth = {};
   Object.entries(data.activities).forEach(([activity, records]) => {
@@ -53,48 +61,16 @@ const ApexChart = () => {
 
         Object.keys(chartConfigs).forEach((month) => {
           const records = chartConfigs[month].records;
-
-          // Filtrar solo fechas del mes seleccionado y ordenarlas
-          const uniqueDates = Object.keys(records)
-            .filter((date) => {
-              const d = new Date(date);
-              return (d.getMonth() + 1).toString().padStart(2, "0") === month;
-            })
-            .sort();
-          
-          // Obtener el último día del mes seleccionado (e.g. 2025-01-31)
-          const now = new Date();
-          const currentYear = now.getFullYear();
-          const currentMonth = (now.getMonth() + 1).toString().padStart(2, "0");
-          
-          const lastDayOfMonth = new Date(`${currentYear}-${month}-01`);
-          lastDayOfMonth.setMonth(lastDayOfMonth.getMonth() + 1); // Ir al próximo mes
-          lastDayOfMonth.setDate(0); // Volver un día: último del mes original
-          const lastDay = lastDayOfMonth.toISOString().split("T")[0];
-          
-          // Verificar si hoy es el último día del mes
-          const todayIsLastDay = now.toISOString().split("T")[0] === lastDay;
-          
-          // Agregar el último día del mes solo si:
-          // - No está ya en uniqueDates
-          // - Y si NO es el mes actual
-          // - O si ES el mes actual, pero hoy es el último día
-          if (!uniqueDates.includes(lastDay)) {
-            if (month !== currentMonth || todayIsLastDay) {
-              uniqueDates.push(lastDay);
-            }
-          }
-          
-          
-
+          const year = Object.keys(records)[0]?.split("-")[0] || "2025";
+          const allDates = getAllDatesInMonth(parseInt(year), parseInt(month));
           const activities = [...new Set(Object.values(records).flatMap(Object.keys))];
 
           chartConfigs[month].series = activities.map((activity) => ({
             name: activity,
-            data: uniqueDates.map((date) => ({
+            data: allDates.map((date) => ({
               x: date,
-              y: mapStatusToValue(records[date]?.[activity] || "failed"),
-              status: records[date]?.[activity] || "failed",
+              y: mapStatusToValue(records[date]?.[activity] || ""),
+              status: records[date]?.[activity] || "",
               activity,
             })),
           }));
@@ -141,12 +117,12 @@ const ApexChart = () => {
           </FormControl>
         </div>
 
-<div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px", marginRight: "22%" }}>
-          <span><span style={{ display: "inline-block",width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Sucky</span>
-          <span><span style={{ display: "inline-block",width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
-          <span><span style={{display: "inline-block", width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
-          <span><span style={{ display: "inline-block",width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished</span>
-          <span><span style={{display: "inline-block", width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence</span>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px", marginRight: "22%" }}>
+          <span><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Sucky</span>
+          <span><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
+          <span><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
+          <span><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished</span>
+          <span><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence</span>
         </div>
       </div>
 
@@ -175,7 +151,10 @@ const ApexChart = () => {
             xaxis: {
               type: "category",
               labels: {
-                formatter: (value) => new Date(value).getDate(),
+                formatter: (value) => {
+                  const day = new Date(value).getDate();
+                  return isNaN(day) ? "" : day;
+                },
                 style: {
                   fontSize: "17px",
                   fontFamily: "Arial",
@@ -187,7 +166,7 @@ const ApexChart = () => {
               title: { text: "" },
               labels: {
                 style: {
-                  fontSize: "19x",
+                  fontSize: "19px",
                   fontFamily: "Arial",
                   fontWeight: 400,
                 },
