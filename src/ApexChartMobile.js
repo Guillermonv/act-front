@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
  
- const API_URL = "https://activity1.free.beeceptor.com/api/v3/activities";
+const API_URL = "http://localhost:8080/activities/grouped";
  
  const parseDate = (dateStr) => {
    const [day, month, year] = dateStr.split("-").map(Number);

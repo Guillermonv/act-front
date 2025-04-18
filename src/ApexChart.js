@@ -54,7 +54,7 @@ const ApexChart = () => {
         Object.keys(chartConfigs).forEach((month) => {
           const records = chartConfigs[month].records;
 
-          // Filtramos y ordenamos las fechas
+          // Filtrar solo fechas del mes seleccionado y ordenarlas
           const uniqueDates = Object.keys(records)
             .filter((date) => {
               const d = new Date(date);
@@ -62,18 +62,29 @@ const ApexChart = () => {
             })
             .sort();
           
-          // Obtener el último día del mes seleccionado
-          const lastDayOfMonth = new Date(`${new Date().getFullYear()}-${month}-01`);
-          lastDayOfMonth.setMonth(lastDayOfMonth.getMonth() + 1); // Avanzamos al siguiente mes
-          lastDayOfMonth.setDate(0); // Retrocedemos un día para obtener el último día del mes seleccionado
+          // Obtener el último día del mes seleccionado (e.g. 2025-01-31)
+          const now = new Date();
+          const currentYear = now.getFullYear();
+          const currentMonth = (now.getMonth() + 1).toString().padStart(2, "0");
           
-          // Convertimos el último día en formato 'YYYY-MM-DD'
+          const lastDayOfMonth = new Date(`${currentYear}-${month}-01`);
+          lastDayOfMonth.setMonth(lastDayOfMonth.getMonth() + 1); // Ir al próximo mes
+          lastDayOfMonth.setDate(0); // Volver un día: último del mes original
           const lastDay = lastDayOfMonth.toISOString().split("T")[0];
           
-          // Si el último día no está en la lista de fechas, lo agregamos al final
+          // Verificar si hoy es el último día del mes
+          const todayIsLastDay = now.toISOString().split("T")[0] === lastDay;
+          
+          // Agregar el último día del mes solo si:
+          // - No está ya en uniqueDates
+          // - Y si NO es el mes actual
+          // - O si ES el mes actual, pero hoy es el último día
           if (!uniqueDates.includes(lastDay)) {
-            uniqueDates.push(lastDay);
+            if (month !== currentMonth || todayIsLastDay) {
+              uniqueDates.push(lastDay);
+            }
           }
+          
           
 
           const activities = [...new Set(Object.values(records).flatMap(Object.keys))];
