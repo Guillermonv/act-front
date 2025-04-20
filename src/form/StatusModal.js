@@ -12,7 +12,7 @@ const statusLevels = [
   { value: 0.35, label: "failed", color: "#FF0000" },
   { value: 0.55, label: "regular", color: "#FFFF00" },
   { value: 0.75, label: "accomplished", color: "#00A100" },
-  { value: 0.95, label: "esxcellence", color: "#0000FF" },
+  { value: 0.95, label: "excellence", color: "#0000FF" },
 ];
 
 const getClosestStatus = (value) => {
@@ -25,6 +25,8 @@ const formatDate = (isoDate) => {
   const [year, month, day] = isoDate.split("-");
   return `${day}-${month}-${year}`;
 };
+
+// ... mismo imports y funciones ...
 
 const StatusModal = ({ selectedCell, setSelectedCell, refreshData }) => {
   if (!selectedCell) return null;
@@ -51,87 +53,101 @@ const StatusModal = ({ selectedCell, setSelectedCell, refreshData }) => {
     })
       .then(() => {
         console.log("Updated successfully");
-        refreshData(); // 🔁 volver a cargar los datos del heatmap
+        refreshData();
       })
       .catch((err) => console.error("Error updating:", err));
 
     setSelectedCell(null);
   };
 
+  const closestStatus = getClosestStatus(currentValue);
+
   return (
     <Modal open={!!selectedCell} onClose={() => setSelectedCell(null)}>
       <Box
         sx={{
-          p: 8,
+          p: 2,
           bgcolor: "#FFFFFF",
-          borderRadius: 0,
-          boxShadow: 50,
-          maxWidth: 500,
-          maxHeight: 150,
+          borderRadius: 1,
+          boxShadow: 10,
+          maxWidth: 450,
           margin: "auto",
           display: "flex",
-          mt: 18,
           flexDirection: "column",
           fontFamily: "Arial, sans-serif",
+          mt: 18,
         }}
       >
-      
-
+        {/* Slider */}
         <Slider
           value={currentValue}
           step={0.01}
-          marks={statusLevels.map(({ value, label, color }) => ({
-            value,
-            label: (
-              <span style={{ color: "#000000", fontSize: "1.2rem", fontWeight: "bold" }}>
-                {label}
-              </span>
-            ),
-          }))}
           min={0.15}
           max={0.95}
           onChange={handleStatusChange}
           sx={{
+            mt: 0,
+            mb: 1,
             color: getClosestStatus(currentValue).color,
-            '& .MuiSlider-markLabel': {
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-              textAlign: "center",
-              whiteSpace: "nowrap",
-              transform: "translateX(-50%)",
-            },
           }}
         />
 
-
-<br></br>
-<Box  justifyContent="space-between" alignItems="flex-start">
-          <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.3rem" }}>
-            <strong>Date:</strong> {formatDate(selectedCell.x)}
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.3rem" }}>
-            <strong>Activity:</strong> {selectedCell.activity}
-          </Typography>
-        </Box>
-
-        <Box sx={{ flexGrow: 1 }} />
-
-        <Button
-          variant="contained"
-          color="success"
-          onClick={handleSave}
+        {/* Fila inferior con Date + Activity, status label y botón */}
+        <Box
           sx={{
-            fontSize: "1.2rem",
-            fontWeight: "bold",
-            py: 1.5,
-            mt: "auto",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 1,
           }}
         >
-          Save
-        </Button>
+          {/* div1 - Fecha y actividad */}
+          <Box sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
+            <Typography variant="body2" sx={{ fontSize: "0.95rem", color: "#000" }}>
+              <strong>Date:</strong> {formatDate(selectedCell.x)}
+            </Typography>
+            <Typography variant="body2" sx={{ fontSize: "0.95rem", color: "#000" }}>
+              <strong>Activity:</strong> {selectedCell.activity}
+            </Typography>
+          </Box>
+
+          {/* div2 - Texto dinámico */}
+          <Box sx={{ flex: 1, textAlign: "center" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontSize: "1rem",
+                fontWeight: "bold",
+                color: "#000",
+              }}
+            >
+              {closestStatus.label}
+            </Typography>
+          </Box>
+
+          {/* div3 - Botón */}
+          <Box sx={{ flex: 1, textAlign: "right" }}>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              sx={{
+                fontSize: "0.9rem",
+                fontWeight: "bold",
+                px: 2,
+                py: 0.5,
+                textTransform: "none",
+                bgcolor: "#000",
+                '&:hover': { bgcolor: "#222" },
+              }}
+            >
+              Save
+            </Button>
+          </Box>
+        </Box>
       </Box>
     </Modal>
   );
 };
 
 export default StatusModal;
+

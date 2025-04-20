@@ -10,14 +10,6 @@ const parseDate = (dateStr) => {
   return `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
 };
 
-const getAllDatesInMonth = (year, month) => {
-  const days = new Date(year, month, 0).getDate();
-  return Array.from({ length: days }, (_, i) => {
-    const day = (i + 1).toString().padStart(2, "0");
-    return `${year}-${month.toString().padStart(2, "0")}-${day}`;
-  });
-};
-
 const transformData = (data) => {
   const recordsByMonth = {};
   Object.entries(data.activities).forEach(([activity, records]) => {
@@ -31,6 +23,7 @@ const transformData = (data) => {
 };
 
 const mapStatusToValue = (status) => {
+  const normalized = (status || "").toLowerCase();
   const statusMap = {
     failed: 0.2,
     regular: 0.5,
@@ -38,7 +31,7 @@ const mapStatusToValue = (status) => {
     accomplished: 1,
     excellence: 1.2,
   };
-  return statusMap[status] ?? null;
+  return statusMap[normalized] ?? null;
 };
 
 const ApexChart = () => {
@@ -61,18 +54,23 @@ const ApexChart = () => {
 
         Object.keys(chartConfigs).forEach((month) => {
           const records = chartConfigs[month].records;
-          const year = Object.keys(records)[0]?.split("-")[0] || "2025";
-          const allDates = getAllDatesInMonth(parseInt(year), parseInt(month));
+
+          // Obtenemos las fechas con datos y las ordenamos
+          const uniqueDates = Object.keys(records).sort((a, b) => new Date(a) - new Date(b));
           const activities = [...new Set(Object.values(records).flatMap(Object.keys))];
 
           chartConfigs[month].series = activities.map((activity) => ({
             name: activity,
-            data: allDates.map((date) => ({
-              x: date,
-              y: mapStatusToValue(records[date]?.[activity] || ""),
-              status: records[date]?.[activity] || "",
-              activity,
-            })),
+            data: uniqueDates.map((date) => {
+              const status = records[date]?.[activity] || "";
+              return {
+                x: date,
+                y: mapStatusToValue(status),
+                date,
+                status: status || "no status",
+                activity,
+              };
+            }),
           }));
         });
 
@@ -93,7 +91,11 @@ const ApexChart = () => {
     if (!selectedSeries) return;
 
     const clickedData = selectedSeries.data[dataPointIndex];
-    setSelectedCell(clickedData);
+
+    setSelectedCell({
+      ...clickedData,
+      date: clickedData.date,
+    });
   };
 
   return (
@@ -151,10 +153,7 @@ const ApexChart = () => {
             xaxis: {
               type: "category",
               labels: {
-                formatter: (value) => {
-                  const day = new Date(value).getDate();
-                  return isNaN(day) ? "" : day;
-                },
+                formatter: (val) => val.split("-")[2], // Mostrar solo el día
                 style: {
                   fontSize: "17px",
                   fontFamily: "Arial",
