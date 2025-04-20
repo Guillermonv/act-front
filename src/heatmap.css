@@ -1,0 +1,9 @@
+/* heatmap.css */
+
+.apexcharts-heatmap-rect {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.heatmap-faded .apexcharts-heatmap-rect {
+  opacity: 0.2 !important;
+}

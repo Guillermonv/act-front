@@ -38,6 +38,7 @@ const ApexChart = () => {
   const [charts, setCharts] = useState({});
   const [selectedMonth, setSelectedMonth] = useState("01");
   const [selectedCell, setSelectedCell] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(null); // Estado para el filtro de color
 
   const fetchData = () => {
     fetch(API_URL)
@@ -98,6 +99,25 @@ const ApexChart = () => {
     });
   };
 
+  // Función para manejar el cambio de color en la leyenda
+  const handleStatusClick = (status) => {
+    // Si el estado ya está seleccionado, desactivamos el filtro
+    setSelectedStatus(prevStatus => (prevStatus === status ? null : status));
+  };
+
+  // Filtrar los datos según el estado seleccionado
+  const filterSeriesByStatus = (series) => {
+    if (!selectedStatus) return series; // Si no hay filtro, retornamos todas las series
+
+    return series.map((s) => ({
+      ...s,
+      data: s.data.map((d) => ({
+        ...d,
+        y: d.status.toLowerCase() === selectedStatus.toLowerCase() ? d.y : null,
+      })),
+    }));
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
       <br />
@@ -120,11 +140,11 @@ const ApexChart = () => {
         </div>
 
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px", marginRight: "22%" }}>
-          <span><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Sucky</span>
-          <span><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
-          <span><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
-          <span><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished</span>
-          <span><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence</span>
+          <span onClick={() => handleStatusClick("suck")}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Suck</span>
+          <span onClick={() => handleStatusClick("failed")}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
+          <span onClick={() => handleStatusClick("regular")}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
+          <span onClick={() => handleStatusClick("accomplished")}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished</span>
+          <span onClick={() => handleStatusClick("excellence")}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence</span>
         </div>
       </div>
 
@@ -172,7 +192,7 @@ const ApexChart = () => {
               },
             },
           }}
-          series={charts[selectedMonth].series}
+          series={filterSeriesByStatus(charts[selectedMonth].series)} // Aplicamos el filtro
           type="heatmap"
           height={400}
           width={1300}
