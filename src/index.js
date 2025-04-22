@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import ApexChart from "./ApexChart"; // Versión para escritorio
 import ApexChartMobile from "./ApexChartMobile"; // Versión para móvil
+import WeightChart from "./WeightChart"; // 💡 Importamos el nuevo line chart
 import reportWebVitals from "./reportWebVitals";
 
 const isMobileDevice = () => {
@@ -24,6 +25,7 @@ const ResponsiveChart = () => {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
+        <WeightChart /> 
     <ResponsiveChart />
   </React.StrictMode>
 );
