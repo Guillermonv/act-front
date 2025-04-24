@@ -67,43 +67,74 @@ const WeightChart = () => {
     }
   ];
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Nuevo peso:", newWeight, "Fecha:", newDate);
+    // Lógica para agregar o enviar datos
+  };
+
   return (
-    <div style={{ display: "flex", justifyContent: "center"}}>
+    <div style={{ display: "flex", justifyContent: "center" }}>
       <div style={{ width: "55%", padding: "1rem", backgroundColor: "white", borderRadius: "1rem", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
         
         {/* Formulario */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
-          
-          {/* Nuevo Peso */}
-          <div style={{ flex: 1, textAlign: "left" }}>
-            <label style={{ fontWeight: "bold" }}>Nuevo Peso:</label>
-            <input
-              type="number"
-              value={newWeight}
-              onChange={(e) => setNewWeight(e.target.value)}
-              placeholder="kg"
-              style={{ padding: "0.5rem", borderRadius: "0.5rem", border: "1px solid #ccc", width: "100%" }}
-            />
-          </div>
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: "1rem", marginBottom: "1rem" }}>
+            
+            {/* Nuevo Peso */}
+            <div style={{ flex: 1 }}>
+              <label style={{ fontWeight: "bold" }}>Nuevo Peso:</label>
+              <input
+                type="number"
+                value={newWeight}
+                onChange={(e) => setNewWeight(e.target.value)}
+                placeholder="kg"
+                style={{ padding: "0.5rem", borderRadius: "0.5rem", border: "1px solid #ccc", width: "100%" }}
+              />
+            </div>
 
-          {/* Peso Ideal */}
-          <div style={{ flex: 1, textAlign: "center", fontWeight: "bold" }}>
-            Peso Ideal: 75
-          </div>
+            {/* Peso Ideal */}
+            <div style={{ flex: 1 }}>
+              <label style={{ fontWeight: "bold", visibility: "hidden" }}>.</label>
+              <div style={{ textAlign: "center", fontWeight: "bold", paddingBottom: "0.5rem" }}>
+                Peso Ideal: 75
+              </div>
+            </div>
 
-          {/* Date Picker */}
-          <div style={{ flex: 1, textAlign: "right" }}>
-            <input
-              type="date"
-              value={newDate}
-              onChange={(e) => setNewDate(e.target.value)}
-              style={{ padding: "0.5rem", borderRadius: "0.5rem", border: "1px solid #ccc", width: "100%" }}
-            />
+            {/* Date Picker */}
+            <div style={{ flex: 1 }}>
+              <label style={{ fontWeight: "bold" }}>Fecha:</label>
+              <input
+                type="date"
+                value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
+                style={{ padding: "0.5rem", borderRadius: "0.5rem", border: "1px solid #ccc", width: "100%" }}
+              />
+            </div>
+
+            {/* Botón Submit */}
+            <div style={{ flexShrink: 0 }}>
+              <button
+                type="submit"
+                style={{
+                  padding: "0.6rem 1.2rem",
+                  borderRadius: "0.5rem",
+                  border: "none",
+                  backgroundColor: "#8e44ad", // violeta
+                  color: "white",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap"
+                }}
+              >
+                Agregar
+              </button>
+            </div>
           </div>
-        </div>
-        
+        </form>
+
         {/* Gráfico */}
-        <Chart options={options} series={series} type="line" height={350} width="100%" />
+        <Chart options={options} series={series} type="line" height={300} width="100%" />
       </div>
     </div>
   );
