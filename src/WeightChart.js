@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 
-// Interpolación lineal entre puntos
-const interpolate = (data, allDates) => {
+// Interpolación lineal dentro del rango real
+const interpolateWithinRange = (data, allDates) => {
   const result = [];
+  const startDate = new Date(data[0].date).getTime();
+  const endDate = new Date(data[data.length - 1].date).getTime();
 
   allDates.forEach(date => {
     const dateMs = new Date(date).getTime();
-    let i = 0;
 
+    if (dateMs < startDate || dateMs > endDate) return;
+
+    let i = 0;
     while (i < data.length && new Date(data[i].date).getTime() < dateMs) {
       i++;
     }
@@ -32,42 +36,36 @@ const interpolate = (data, allDates) => {
 const WeightChart = () => {
   const [newWeight, setNewWeight] = useState("");
   const [newDate, setNewDate] = useState("");
+  const [data, setData] = useState(null);
 
-  const data = {
-    ideal: [
-      { weight: 84, date: "2025-01-01" },
-      { weight: 75, date: "2025-12-31" }
-    ],
-    current: [
-      { weight: 84, date: "2025-01-01" },
-      { weight: 83, date: "2025-02-01" },
-      { weight: 82, date: "2025-03-01" },
-      { weight: 81, date: "2025-04-01" },
-      { weight: 80, date: "2025-05-01" },
-      { weight: 79, date: "2025-06-01" },
-      { weight: 78, date: "2025-07-01" },
-      { weight: 77, date: "2025-08-01" },
-      { weight: 76, date: "2025-09-01" },
-      { weight: 75, date: "2025-10-01" },
-      { weight: 74, date: "2025-11-01" },
-      { weight: 73, date: "2025-12-01" }
-    ]
-  };
+  useEffect(() => {
+    fetch("https://weight.free.beeceptor.com/weights")
+      .then((res) => res.json())
+      .then(setData)
+      .catch((err) => console.error("Error cargando data:", err));
+  }, []);
 
-  // Fechas únicas combinadas
-  const allDates = Array.from(new Set([
-    ...data.ideal.map(d => d.date),
-    ...data.current.map(d => d.date)
-  ])).sort();
+  if (!data) return <div>Cargando datos...</div>;
+
+  // Fechas únicas ordenadas solo dentro del rango de cada serie
+  const allDates = Array.from(
+    new Set([
+      ...data.ideal.map(d => d.date),
+      ...data.current.map(d => d.date)
+    ])
+  ).sort();
+
+  const idealInterpolated = interpolateWithinRange(data.ideal, allDates);
+  const currentInterpolated = interpolateWithinRange(data.current, allDates);
 
   const series = [
     {
       name: "Ideal",
-      data: interpolate(data.ideal, allDates)
+      data: idealInterpolated
     },
     {
       name: "Actual",
-      data: interpolate(data.current, allDates)
+      data: currentInterpolated
     }
   ];
 
@@ -82,25 +80,24 @@ const WeightChart = () => {
       type: "datetime",
       title: { text: "Fecha" },
       labels: {
-        formatter: function (value) {
+        formatter: (value) => {
           const date = new Date(value);
-          return date.getDate() + " " + date.toLocaleString("default", { month: "short" }) + " " + date.getFullYear();
+          return `${date.getDate()} ${date.toLocaleString("default", { month: "short" })}`;
         }
       }
     },
     yaxis: {
       title: { text: "Peso (kg)" },
       labels: {
-        formatter: function (value) {
-          return Math.floor(value); // Sin decimales en el eje Y
-        }
+        formatter: (value) => Math.floor(value)
       }
     },
     stroke: {
-      curve: "smooth"
+      curve: "smooth",
+      width: 3
     },
     markers: {
-      size: 4
+      size: 0
     },
     legend: {
       show: false
@@ -113,16 +110,35 @@ const WeightChart = () => {
         format: "dd MMM yyyy"
       },
       y: {
-        formatter: function (value) {
-          return value.toFixed(2); // Limitar a 2 decimales
-        }
+        formatter: (val) => val.toFixed(2)
       }
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Nuevo peso:", newWeight, "Fecha:", newDate);
+
+    const payload = {
+      date: newDate,
+      weight: parseFloat(newWeight),
+    };
+
+    fetch("http://demo/weight", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al hacer el PUT");
+        return res.json();
+      })
+      .then((data) => {
+        console.log("PUT exitoso:", data);
+        // Podrías recargar los datos aquí si querés
+      })
+      .catch((err) => console.error("Error en PUT:", err));
   };
 
   return (
@@ -150,7 +166,7 @@ const WeightChart = () => {
                 color: "#555",
                 fontFamily: "'Segoe UI', sans-serif"
               }}>
-                Peso Ideal: <strong>75 kg</strong>
+                Peso Ideal: <strong>74 kg</strong>
               </div>
             </div>
 
@@ -162,16 +178,21 @@ const WeightChart = () => {
               flexGrow: 1,
               justifyContent: "flex-end"
             }}>
-              <div style={{ display: "flex", gap: "1rem", marginRight: "1rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <div style={{ width: "14px", height: "14px", backgroundColor: "#008FFB", borderRadius: "50%" }}></div>
-                  <span style={{ color: "#444", fontSize: "0.9rem" }}>Ideal</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <div style={{ width: "14px", height: "14px", backgroundColor: "#00E396", borderRadius: "50%" }}></div>
-                  <span style={{ color: "#444", fontSize: "0.9rem" }}>Actual</span>
-                </div>
-              </div>
+          <div style={{ display: "flex", gap: "1rem", marginRight: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              <div style={{ width: "14px", height: "14px", backgroundColor: "#008FFB", borderRadius: "50%" }}></div>
+              <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer", color: "#444", fontSize: "0.9rem" }}>
+                Ideal
+              </span>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              <div style={{ width: "14px", height: "14px", backgroundColor: "#00E396", borderRadius: "50%" }}></div>
+              <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer", color: "#444", fontSize: "0.9rem" }}>
+                Actual
+              </span>
+            </div>
+          </div>
 
               <input
                 type="number"

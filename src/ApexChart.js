@@ -3,6 +3,10 @@ import ReactApexChart from "react-apexcharts";
 import StatusModal from "./form/StatusModal";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
+// Establecer las fuentes elegantes
+import "@fontsource/roboto";  // Fuente Roboto
+import "@fontsource/montserrat";  // Fuente Montserrat
+
 const API_URL = "http://localhost:8080/activities/grouped";
 
 const parseDate = (dateStr) => {
@@ -119,7 +123,7 @@ const ApexChart = () => {
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
+    <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem", fontFamily: "Roboto, sans-serif" }}>
       <div style={{ width: "55%", padding: "1rem", backgroundColor: "white", borderRadius: "1rem", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
       <div style={{ display: "flex", width: "100%" }}>
         <div style={{ display: "flex", marginLeft: "0%" }}>
@@ -139,11 +143,11 @@ const ApexChart = () => {
         </div>
 
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px", marginRight: "22%" }}>
-          <span onClick={() => handleStatusClick("suck")}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Suck</span>
-          <span onClick={() => handleStatusClick("failed")}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
-          <span onClick={() => handleStatusClick("regular")}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
-          <span onClick={() => handleStatusClick("accomplished")}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished</span>
-          <span onClick={() => handleStatusClick("excellence")}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence</span>
+          <span onClick={() => handleStatusClick("suck")} style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer" }}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Suck</span>
+          <span onClick={() => handleStatusClick("failed")} style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer" }}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
+          <span onClick={() => handleStatusClick("regular")} style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer" }}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
+          <span onClick={() => handleStatusClick("accomplished")} style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer" }}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#00A100", marginRight: 5 }}></span> Accomplished</span>
+          <span onClick={() => handleStatusClick("excellence")} style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer" }}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#0000FF", marginRight: 5 }}></span> Excellence</span>
         </div>
       </div>
 
@@ -174,8 +178,8 @@ const ApexChart = () => {
               labels: {
                 formatter: (val) => val.split("-")[2], // Mostrar solo el día
                 style: {
-                  fontSize: "17px",
-                  fontFamily: "Arial",
+                  fontSize: "16px",
+                  fontFamily: "Roboto, sans-serif",
                   fontWeight: 400,
                 },
               },
@@ -184,8 +188,8 @@ const ApexChart = () => {
               title: { text: "" },
               labels: {
                 style: {
-                  fontSize: "19px",
-                  fontFamily: "Arial",
+                  fontSize: "16px",
+                  fontFamily: "Roboto, sans-serif",
                   fontWeight: 400,
                 },
               },
