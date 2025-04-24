@@ -119,11 +119,12 @@ const ApexChart = () => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+    <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
+      <div style={{ width: "55%", padding: "1rem", backgroundColor: "white", borderRadius: "1rem", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
       <br />
       <br />
       <div style={{ display: "flex", width: "100%" }}>
-        <div style={{ display: "flex", marginLeft: "22%" }}>
+        <div style={{ display: "flex", marginLeft: "0%" }}>
           <FormControl variant="outlined" style={{ minWidth: 150 }}>
             <InputLabel>Mes</InputLabel>
             <Select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} label="Mes">
@@ -195,11 +196,12 @@ const ApexChart = () => {
           series={filterSeriesByStatus(charts[selectedMonth].series)} // Aplicamos el filtro
           type="heatmap"
           height="150%"
-          width="450%"
+          width="100%"
         />
       )}
 
       <StatusModal selectedCell={selectedCell} setSelectedCell={setSelectedCell} refreshData={fetchData} />
+    </div>
     </div>
   );
 };

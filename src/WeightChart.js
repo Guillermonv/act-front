@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import Chart from "react-apexcharts";
 
 const WeightChart = () => {
+  const [newWeight, setNewWeight] = useState("");
+  const [newDate, setNewDate] = useState("");
+
   const data = {
     ideal: [
       { weight: 84, date: "2025-01-01" },
@@ -65,14 +68,45 @@ const WeightChart = () => {
   ];
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
-      <div style={{ padding: "1rem", backgroundColor: "white", borderRadius: "1rem", boxShadow: "10 10px 10px rgba(94, 33, 206, 0.1)" }}>
-        <h2 style={{ textAlign: "center", fontSize: "1.25rem", fontWeight: "600", marginBottom: "1rem" }}>Progreso de Peso</h2>
-        <Chart options={options} series={series} type="line" height={350} width="450%" />
+    <div style={{ display: "flex", justifyContent: "center"}}>
+      <div style={{ width: "55%", padding: "1rem", backgroundColor: "white", borderRadius: "1rem", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
+        
+        {/* Formulario */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+          
+          {/* Nuevo Peso */}
+          <div style={{ flex: 1, textAlign: "left" }}>
+            <label style={{ fontWeight: "bold" }}>Nuevo Peso:</label>
+            <input
+              type="number"
+              value={newWeight}
+              onChange={(e) => setNewWeight(e.target.value)}
+              placeholder="kg"
+              style={{ padding: "0.5rem", borderRadius: "0.5rem", border: "1px solid #ccc", width: "100%" }}
+            />
+          </div>
+
+          {/* Peso Ideal */}
+          <div style={{ flex: 1, textAlign: "center", fontWeight: "bold" }}>
+            Peso Ideal: 75
+          </div>
+
+          {/* Date Picker */}
+          <div style={{ flex: 1, textAlign: "right" }}>
+            <input
+              type="date"
+              value={newDate}
+              onChange={(e) => setNewDate(e.target.value)}
+              style={{ padding: "0.5rem", borderRadius: "0.5rem", border: "1px solid #ccc", width: "100%" }}
+            />
+          </div>
+        </div>
+        
+        {/* Gráfico */}
+        <Chart options={options} series={series} type="line" height={350} width="100%" />
       </div>
     </div>
   );
-  
 };
 
 export default WeightChart;
