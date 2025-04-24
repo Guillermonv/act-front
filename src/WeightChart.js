@@ -65,15 +65,14 @@ const WeightChart = () => {
   ];
 
   return (
-    <div className="mt-6" style={{ display: "flex", justifyContent: "center" }}>
-      <div style={{ width: "50%" }}>
-        <div className="p-4 bg-white rounded-xl shadow">
-          <h2 className="text-xl font-semibold mb-2 text-center">Progreso de Peso</h2>
-          <Chart options={options} series={series} type="line" height={350} width="100%" />
-        </div>
+    <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
+      <div style={{ padding: "1rem", backgroundColor: "white", borderRadius: "1rem", boxShadow: "10 10px 10px rgba(94, 33, 206, 0.1)" }}>
+        <h2 style={{ textAlign: "center", fontSize: "1.25rem", fontWeight: "600", marginBottom: "1rem" }}>Progreso de Peso</h2>
+        <Chart options={options} series={series} type="line" height={350} width="450%" />
       </div>
     </div>
   );
+  
 };
 
 export default WeightChart;

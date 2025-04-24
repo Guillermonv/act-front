@@ -194,8 +194,8 @@ const ApexChart = () => {
           }}
           series={filterSeriesByStatus(charts[selectedMonth].series)} // Aplicamos el filtro
           type="heatmap"
-          height={400}
-          width={1300}
+          height="150%"
+          width="450%"
         />
       )}
 
