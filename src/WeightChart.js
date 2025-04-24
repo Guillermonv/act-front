@@ -1,6 +1,34 @@
 import React, { useState } from "react";
 import Chart from "react-apexcharts";
 
+// Interpolación lineal entre puntos
+const interpolate = (data, allDates) => {
+  const result = [];
+
+  allDates.forEach(date => {
+    const dateMs = new Date(date).getTime();
+    let i = 0;
+
+    while (i < data.length && new Date(data[i].date).getTime() < dateMs) {
+      i++;
+    }
+
+    if (i === 0) {
+      result.push({ x: dateMs, y: data[0].weight });
+    } else if (i === data.length) {
+      result.push({ x: dateMs, y: data[data.length - 1].weight });
+    } else {
+      const prev = data[i - 1];
+      const next = data[i];
+      const t = (dateMs - new Date(prev.date).getTime()) / (new Date(next.date).getTime() - new Date(prev.date).getTime());
+      const y = prev.weight + t * (next.weight - prev.weight);
+      result.push({ x: dateMs, y });
+    }
+  });
+
+  return result;
+};
+
 const WeightChart = () => {
   const [newWeight, setNewWeight] = useState("");
   const [newDate, setNewDate] = useState("");
@@ -26,24 +54,47 @@ const WeightChart = () => {
     ]
   };
 
+  // Fechas únicas combinadas
+  const allDates = Array.from(new Set([
+    ...data.ideal.map(d => d.date),
+    ...data.current.map(d => d.date)
+  ])).sort();
+
+  const series = [
+    {
+      name: "Ideal",
+      data: interpolate(data.ideal, allDates)
+    },
+    {
+      name: "Actual",
+      data: interpolate(data.current, allDates)
+    }
+  ];
+
   const options = {
     chart: {
       id: "weight-chart",
       type: "line",
-      zoom: { enabled: false }
+      zoom: { enabled: false },
+      toolbar: { show: false }
     },
     xaxis: {
       type: "datetime",
       title: { text: "Fecha" },
       labels: {
-        datetimeFormatter: {
-          month: "MMM",
-          year: "yyyy"
+        formatter: function (value) {
+          const date = new Date(value);
+          return date.getDate() + " " + date.toLocaleString("default", { month: "short" }) + " " + date.getFullYear();
         }
       }
     },
     yaxis: {
-      title: { text: "Peso (kg)" }
+      title: { text: "Peso (kg)" },
+      labels: {
+        formatter: function (value) {
+          return Math.floor(value); // Sin decimales en el eje Y
+        }
+      }
     },
     stroke: {
       curve: "smooth"
@@ -52,79 +103,111 @@ const WeightChart = () => {
       size: 4
     },
     legend: {
-      position: "top"
+      show: false
+    },
+    colors: ["#008FFB", "#00E396"],
+    tooltip: {
+      shared: true,
+      intersect: false,
+      x: {
+        format: "dd MMM yyyy"
+      },
+      y: {
+        formatter: function (value) {
+          return value.toFixed(2); // Limitar a 2 decimales
+        }
+      }
     }
   };
-
-  const series = [
-    {
-      name: "Ideal",
-      data: data.ideal.map(d => ({ x: new Date(d.date).getTime(), y: d.weight }))
-    },
-    {
-      name: "Actual",
-      data: data.current.map(d => ({ x: new Date(d.date).getTime(), y: d.weight }))
-    }
-  ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Nuevo peso:", newWeight, "Fecha:", newDate);
-    // Lógica para agregar o enviar datos
   };
 
   return (
     <div style={{ display: "flex", justifyContent: "center" }}>
-      <div style={{ width: "55%", padding: "1rem", backgroundColor: "white", borderRadius: "1rem", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
-        
-        {/* Formulario */}
+      <div style={{
+        width: "55%",
+        padding: "1.5rem",
+        backgroundColor: "white",
+        borderRadius: "1rem",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+        fontFamily: "Arial, sans-serif"
+      }}>
         <form onSubmit={handleSubmit}>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: "1rem", marginBottom: "1rem" }}>
-            
-            {/* Nuevo Peso */}
-            <div style={{ flex: 1 }}>
-              <label style={{ fontWeight: "bold" }}>Nuevo Peso:</label>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+            marginBottom: "1.5rem",
+            flexWrap: "wrap"
+          }}>
+            <div style={{ minWidth: "120px", textAlign: "left" }}>
+              <div style={{
+                fontSize: "1.2rem",
+                color: "#555",
+                fontFamily: "'Segoe UI', sans-serif"
+              }}>
+                Peso Ideal: <strong>75 kg</strong>
+              </div>
+            </div>
+
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              flexShrink: 0,
+              flexGrow: 1,
+              justifyContent: "flex-end"
+            }}>
+              <div style={{ display: "flex", gap: "1rem", marginRight: "1rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                  <div style={{ width: "14px", height: "14px", backgroundColor: "#008FFB", borderRadius: "50%" }}></div>
+                  <span style={{ color: "#444", fontSize: "0.9rem" }}>Ideal</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                  <div style={{ width: "14px", height: "14px", backgroundColor: "#00E396", borderRadius: "50%" }}></div>
+                  <span style={{ color: "#444", fontSize: "0.9rem" }}>Actual</span>
+                </div>
+              </div>
+
               <input
                 type="number"
                 value={newWeight}
                 onChange={(e) => setNewWeight(e.target.value)}
-                placeholder="kg"
-                style={{ padding: "0.5rem", borderRadius: "0.5rem", border: "1px solid #ccc", width: "100%" }}
+                placeholder="Nuevo peso (kg)"
+                style={{
+                  padding: "0.5rem 0.75rem",
+                  borderRadius: "0.5rem",
+                  border: "1px solid #ccc",
+                  width: "120px",
+                  fontSize: "0.9rem"
+                }}
               />
-            </div>
-
-            {/* Peso Ideal */}
-            <div style={{ flex: 1 }}>
-              <label style={{ fontWeight: "bold", visibility: "hidden" }}>.</label>
-              <div style={{ textAlign: "center", fontWeight: "bold", paddingBottom: "0.5rem" }}>
-                Peso Ideal: 75
-              </div>
-            </div>
-
-            {/* Date Picker */}
-            <div style={{ flex: 1 }}>
-              <label style={{ fontWeight: "bold" }}>Fecha:</label>
               <input
                 type="date"
                 value={newDate}
                 onChange={(e) => setNewDate(e.target.value)}
-                style={{ padding: "0.5rem", borderRadius: "0.5rem", border: "1px solid #ccc", width: "100%" }}
+                style={{
+                  padding: "0.5rem 0.75rem",
+                  borderRadius: "0.5rem",
+                  border: "1px solid #ccc",
+                  fontSize: "0.9rem"
+                }}
               />
-            </div>
-
-            {/* Botón Submit */}
-            <div style={{ flexShrink: 0 }}>
               <button
                 type="submit"
                 style={{
-                  padding: "0.6rem 1.2rem",
+                  padding: "0.55rem 1.1rem",
                   borderRadius: "0.5rem",
                   border: "none",
-                  backgroundColor: "#8e44ad", // violeta
+                  backgroundColor: "#8e44ad",
                   color: "white",
                   fontWeight: "bold",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap"
+                  fontSize: "0.9rem",
+                  cursor: "pointer"
                 }}
               >
                 Agregar
@@ -133,7 +216,6 @@ const WeightChart = () => {
           </div>
         </form>
 
-        {/* Gráfico */}
         <Chart options={options} series={series} type="line" height={300} width="100%" />
       </div>
     </div>
