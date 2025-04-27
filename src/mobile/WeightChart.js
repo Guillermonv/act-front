@@ -126,7 +126,7 @@ const WeightChart = () => {
     }}>
       {/* Formulario angosto */}
       <form onSubmit={handleSubmit} style={{
-        width: "100%",
+        width: "90%",
         maxWidth: "400px", // 👈 no ocupa todo el ancho
         backgroundColor: "white",
         padding: "1rem",
