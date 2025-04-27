@@ -45,7 +45,7 @@ const WeightChart = () => {
   const [data, setData] = useState(null);
 
   const fetchData = () => {
-    fetch("http://localhost:8080/weight/list")
+    fetch("http://44.204.238.86:80/weight/list")
       .then((res) => res.json())
       .then(setData)
       .catch((err) => console.error("Error cargando data:", err));
