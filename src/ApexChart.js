@@ -7,7 +7,7 @@ import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import "@fontsource/roboto";  // Fuente Roboto
 import "@fontsource/montserrat";  // Fuente Montserrat
 
-const API_URL = "http://localhost:8080/activities/grouped";
+const API_URL = "http://44.204.238.86:80/activities/grouped";
 
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);

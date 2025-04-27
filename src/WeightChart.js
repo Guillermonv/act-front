@@ -126,7 +126,7 @@ const WeightChart = () => {
       weight: parseFloat(newWeight),
     };
 
-    fetch("http://localhost:8080/weight/add", {
+    fetch("http://44.204.238.86:80/weight/add", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
