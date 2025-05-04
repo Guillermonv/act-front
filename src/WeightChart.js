@@ -14,7 +14,7 @@ const interpolateWithinRange = (data, allDates) => {
     const dateMs = new Date(date).getTime();
 
     if (dateMs < startDate || dateMs > endDate) {
-      result.push({ x: dateMs, y: null }); // Mostrar vacío fuera del rango
+      result.push({ x: dateMs, y: null });
       return;
     }
 
@@ -57,7 +57,6 @@ const WeightChart = () => {
 
   if (!data) return <div>Cargando datos...</div>;
 
-  // Fechas únicas
   const allDates = Array.from(
     new Set([
       ...data.ideal.map(d => d.date),
@@ -78,11 +77,17 @@ const WeightChart = () => {
       id: "weight-chart",
       type: "line",
       zoom: { enabled: false },
-      toolbar: { show: false }
+      toolbar: { show: false },
+      fontFamily: "Roboto, sans-serif"
     },
     xaxis: {
       type: "datetime",
       labels: {
+        style: {
+          fontFamily: "Roboto, sans-serif",
+          fontSize: "0.9rem",
+          fontWeight: "500"
+        },
         formatter: (value) => {
           const date = new Date(value);
           return `${date.getDate()} ${date.toLocaleString("default", { month: "short" })}`;
@@ -90,8 +95,20 @@ const WeightChart = () => {
       }
     },
     yaxis: {
-      title: { text: "Peso (kg)" },
+      title: {
+        text: "Peso (kg)",
+        style: {
+          fontFamily: "Roboto, sans-serif",
+          fontSize: "0.9rem",
+          fontWeight: "500"
+        }
+      },
       labels: {
+        style: {
+          fontFamily: "Roboto, sans-serif",
+          fontSize: "0.9rem",
+          fontWeight: "500"
+        },
         formatter: (value) => Math.floor(value)
       }
     },
@@ -113,7 +130,19 @@ const WeightChart = () => {
         format: "dd MMM yyyy"
       },
       y: {
-        formatter: (val) => val !== null ? val.toFixed(2) : "-"
+        formatter: (val) => val !== null ? val.toFixed(2) : "-",
+        title: {
+          style: {
+            fontFamily: "Roboto, sans-serif",
+            fontSize: "0.9rem",
+            fontWeight: "500"
+          }
+        }
+      },
+      style: {
+        fontFamily: "Roboto, sans-serif",
+        fontSize: "0.9rem",
+        fontWeight: "500"
       }
     }
   };
@@ -137,8 +166,8 @@ const WeightChart = () => {
       })
       .then(() => {
         console.log("PUT exitoso");
-        fetchData(); // 🔥 actualiza el gráfico
-        setNewWeight(""); // 🔥 limpia inputs
+        fetchData();
+        setNewWeight("");
         setNewDate("");
       })
       .catch((err) => console.error("Error en PUT:", err));
@@ -152,7 +181,9 @@ const WeightChart = () => {
         backgroundColor: "white",
         borderRadius: "1rem",
         boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-        fontFamily: "Arial, sans-serif"
+        fontFamily: "Roboto, sans-serif",
+        fontSize: "0.9rem",
+        fontWeight: "500"
       }}>
         <form onSubmit={handleSubmit}>
           <div style={{
@@ -165,9 +196,10 @@ const WeightChart = () => {
           }}>
             <div style={{ minWidth: "120px", textAlign: "left" }}>
               <div style={{
-                fontSize: "1.2rem",
+                fontSize: "0.9rem",
+                fontWeight: "500",
                 color: "#555",
-                fontFamily: "'Segoe UI', sans-serif"
+                fontFamily: "Roboto, sans-serif"
               }}>
                 Peso Ideal: <strong>74 kg</strong>
               </div>
@@ -184,14 +216,24 @@ const WeightChart = () => {
               <div style={{ display: "flex", gap: "1rem", marginRight: "1rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                   <div style={{ width: "14px", height: "14px", backgroundColor: "#008FFB", borderRadius: "50%" }}></div>
-                  <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer", color: "#444", fontSize: "0.9rem" }}>
+                  <span style={{
+                    fontFamily: "Roboto, sans-serif",
+                    fontWeight: "500",
+                    fontSize: "0.9rem",
+                    color: "#444"
+                  }}>
                     Ideal
                   </span>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                   <div style={{ width: "14px", height: "14px", backgroundColor: "#00E396", borderRadius: "50%" }}></div>
-                  <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer", color: "#444", fontSize: "0.9rem" }}>
+                  <span style={{
+                    fontFamily: "Roboto, sans-serif",
+                    fontWeight: "500",
+                    fontSize: "0.9rem",
+                    color: "#444"
+                  }}>
                     Actual
                   </span>
                 </div>
@@ -207,7 +249,9 @@ const WeightChart = () => {
                   borderRadius: "0.5rem",
                   border: "1px solid #ccc",
                   width: "120px",
-                  fontSize: "0.9rem"
+                  fontSize: "0.9rem",
+                  fontFamily: "Roboto, sans-serif",
+                  fontWeight: "500"
                 }}
               />
               <input
@@ -218,7 +262,9 @@ const WeightChart = () => {
                   padding: "0.5rem 0.75rem",
                   borderRadius: "0.5rem",
                   border: "1px solid #ccc",
-                  fontSize: "0.9rem"
+                  fontSize: "0.9rem",
+                  fontFamily: "Roboto, sans-serif",
+                  fontWeight: "500"
                 }}
               />
               <button
@@ -229,8 +275,9 @@ const WeightChart = () => {
                   border: "none",
                   backgroundColor: "#8e44ad",
                   color: "white",
-                  fontWeight: "bold",
+                  fontWeight: "500",
                   fontSize: "0.9rem",
+                  fontFamily: "Roboto, sans-serif",
                   cursor: "pointer"
                 }}
               >
