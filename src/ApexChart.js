@@ -124,9 +124,9 @@ const ApexChart = () => {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem", fontFamily: "Roboto, sans-serif" }}>
-      <div style={{ width: "55%", padding: "1rem", backgroundColor: "white", borderRadius: "1rem", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
-      <div style={{ display: "flex", width: "100%" }}>
-        <div style={{ display: "flex", marginLeft: "0%" }}>
+      <div style={{ width: "55%", padding: "1rem", backgroundColor: "white", borderRadius: "1rem", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" ,marginBottom: 0 }}>
+      <div style={{ display: "flex", width: "100%" ,marginBottom: 0 }}>
+        <div style={{ display: "flex", marginLeft: "0%"  }}>
           <FormControl variant="outlined" style={{ minWidth: 150 }}>
             <InputLabel>Mes</InputLabel>
             <Select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} label="Mes">
@@ -142,7 +142,7 @@ const ApexChart = () => {
           </FormControl>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px", marginRight: "22%" }}>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexGrow: 1, gap: "12px", marginRight: "22%" ,marginBottom: 0 }}>
           <span onClick={() => handleStatusClick("suck")} style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer" }}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#000000", marginRight: 5 }}></span> Suck</span>
           <span onClick={() => handleStatusClick("failed")} style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer" }}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FF0000", marginRight: 5 }}></span> Failed</span>
           <span onClick={() => handleStatusClick("regular")} style={{ fontFamily: "Montserrat, sans-serif", fontWeight: "500", cursor: "pointer" }}><span style={{ display: "inline-block", width: 10, height: 10, backgroundColor: "#FFFF00", marginRight: 5 }}></span> Regular</span>
@@ -154,7 +154,19 @@ const ApexChart = () => {
       {charts[selectedMonth] && (
         <ReactApexChart
           options={{
-            chart: { type: "heatmap", events: { dataPointSelection: handleCellClick } },
+          chart: {
+            type: "heatmap",
+            events: {
+              dataPointSelection: handleCellClick,
+            },
+            toolbar: {
+              show: true,
+              tools: {
+                download: false, // Desactiva el botón de descarga
+              },
+            },
+          },
+          
             plotOptions: {
               heatmap: {
                 shadeIntensity: 0.5,
