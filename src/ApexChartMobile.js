@@ -23,11 +23,12 @@ const transformData = (data) => {
         const record = data.activities[activity]?.find((r) => parseDate(r.date) === date);
         let yValue = null;
         if (record) {
-          if (record.status.toLowerCase() === "suck") yValue = 0.001;
-          else if (record.status.toLowerCase() === "failed") yValue = 0.2;
-          else if (record.status.toLowerCase() === "regular") yValue = 0.5;
-          else if (record.status.toLowerCase() === "accomplished") yValue = 1;
-          else if (record.status.toLowerCase() === "excellence") yValue = 1.2;
+          const status = record.status.toLowerCase();
+          if (status === "suck") yValue = 0.001;
+          else if (status === "failed") yValue = 0.2;
+          else if (status === "regular") yValue = 0.5;
+          else if (status === "accomplished") yValue = 1;
+          else if (status === "excellence") yValue = 1.2;
         }
         return { x: activity, y: yValue };
       }),
@@ -72,16 +73,22 @@ const ApexChartMobile = () => {
             dataLabels: { enabled: false },
             xaxis: {
               categories: categories,
-              position: "top", // Actividades arriba
+              position: "top",
+              tickPlacement: "between", // 🔄 más preciso con heatmap
               labels: {
-                rotate: -45, // Etiquetas inclinadas
+                rotate: -45,
+                align: "bottom",
+                offsetY: 10,
+                offsetX: 10, // 💡 Mueve el texto hacia la derecha para centrarlo
                 style: {
                   fontSize: "12px",
                   fontWeight: 600,
                   fontFamily: "Roboto, sans-serif",
                 },
+                formatter: (val) => val, // Forzar nombres limpios
               },
             },
+            
             yaxis: {
               opposite: false,
               labels: {
@@ -94,13 +101,15 @@ const ApexChartMobile = () => {
             },
             grid: {
               padding: {
-                left: 50, // ⬅️ mueve todo el gráfico a la derecha
+                left: 50,
                 right: 20,
-                top: 20,
-                bottom: 20,
+                top: 0,
+                bottom: 0, // ⬆️ más margen inferior
               },
             },
+            
             title: {
+              text: "Actividad por Fecha",
               align: "center",
               style: {
                 fontSize: "18px",
@@ -116,7 +125,13 @@ const ApexChartMobile = () => {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: "1rem" }}>
-      <div style={{ maxWidth: "95vw", backgroundColor: "white", padding: "1rem", borderRadius: "12px", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
+      <div style={{
+        maxWidth: "95vw",
+        backgroundColor: "white",
+        padding: "1rem",
+        borderRadius: "12px",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.1)"
+      }}>
         <ReactApexChart
           options={chartData.options}
           series={chartData.series}
