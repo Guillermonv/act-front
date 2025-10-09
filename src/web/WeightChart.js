@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
+import { FormControlLabel, Switch } from "@mui/material";
 
 // Interpolación lineal controlando límites
 const interpolateWithinRange = (data, allDates) => {
@@ -30,7 +31,9 @@ const interpolateWithinRange = (data, allDates) => {
     } else {
       const prev = data[i - 1];
       const next = data[i];
-      const t = (dateMs - new Date(prev.date).getTime()) / (new Date(next.date).getTime() - new Date(prev.date).getTime());
+      const t =
+        (dateMs - new Date(prev.date).getTime()) /
+        (new Date(next.date).getTime() - new Date(prev.date).getTime());
       const y = prev.weight + t * (next.weight - prev.weight);
       result.push({ x: dateMs, y });
     }
@@ -43,6 +46,7 @@ const WeightChart = () => {
   const [newWeight, setNewWeight] = useState("");
   const [newDate, setNewDate] = useState("");
   const [data, setData] = useState(null);
+  const [showAll, setShowAll] = useState(true); // 🔘 Estado del toggle
 
   const fetchData = () => {
     fetch("http://44.204.238.86:80/weight/list")
@@ -58,10 +62,7 @@ const WeightChart = () => {
   if (!data) return <div>Cargando datos...</div>;
 
   const allDates = Array.from(
-    new Set([
-      ...data.ideal.map(d => d.date),
-      ...data.current.map(d => d.date)
-    ])
+    new Set([...data.ideal.map((d) => d.date), ...data.current.map((d) => d.date)])
   ).sort();
 
   const idealInterpolated = interpolateWithinRange(data.ideal, allDates);
@@ -69,7 +70,7 @@ const WeightChart = () => {
 
   const series = [
     { name: "Ideal", data: idealInterpolated },
-    { name: "Actual", data: currentInterpolated }
+    { name: "Actual", data: currentInterpolated },
   ];
 
   const options = {
@@ -78,7 +79,7 @@ const WeightChart = () => {
       type: "line",
       zoom: { enabled: false },
       toolbar: { show: false },
-      fontFamily: "Roboto, sans-serif"
+      fontFamily: "Roboto, sans-serif",
     },
     xaxis: {
       type: "datetime",
@@ -86,13 +87,15 @@ const WeightChart = () => {
         style: {
           fontFamily: "Roboto, sans-serif",
           fontSize: "0.9rem",
-          fontWeight: "500"
+          fontWeight: "500",
         },
         formatter: (value) => {
           const date = new Date(value);
-          return `${date.getDate()} ${date.toLocaleString("default", { month: "short" })}`;
-        }
-      }
+          return `${date.getDate()} ${date.toLocaleString("default", {
+            month: "short",
+          })}`;
+        },
+      },
     },
     yaxis: {
       title: {
@@ -100,51 +103,51 @@ const WeightChart = () => {
         style: {
           fontFamily: "Roboto, sans-serif",
           fontSize: "0.9rem",
-          fontWeight: "500"
-        }
+          fontWeight: "500",
+        },
       },
       labels: {
         style: {
           fontFamily: "Roboto, sans-serif",
           fontSize: "0.9rem",
-          fontWeight: "500"
+          fontWeight: "500",
         },
-        formatter: (value) => Math.floor(value)
-      }
+        formatter: (value) => Math.floor(value),
+      },
     },
     stroke: {
       curve: "smooth",
-      width: 3
+      width: 3,
     },
     markers: {
-      size: 0
+      size: 0,
     },
     legend: {
-      show: false
+      show: false,
     },
     colors: ["#008FFB", "#00E396"],
     tooltip: {
       shared: true,
       intersect: false,
       x: {
-        format: "dd MMM yyyy"
+        format: "dd MMM yyyy",
       },
       y: {
-        formatter: (val) => val !== null ? val.toFixed(2) : "-",
+        formatter: (val) => (val !== null ? val.toFixed(2) : "-"),
         title: {
           style: {
             fontFamily: "Roboto, sans-serif",
             fontSize: "0.9rem",
-            fontWeight: "500"
-          }
-        }
+            fontWeight: "500",
+          },
+        },
       },
       style: {
         fontFamily: "Roboto, sans-serif",
         fontSize: "0.9rem",
-        fontWeight: "500"
-      }
-    }
+        fontWeight: "500",
+      },
+    },
   };
 
   const handleSubmit = (e) => {
@@ -175,65 +178,105 @@ const WeightChart = () => {
 
   return (
     <div style={{ display: "flex", justifyContent: "center" }}>
-      <div style={{
-        width: "55%",
-        padding: "1.5rem",
-        backgroundColor: "white",
-        borderRadius: "1rem",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-        fontFamily: "Roboto, sans-serif",
-        fontSize: "0.9rem",
-        fontWeight: "500"
-      }}>
+      <div
+        style={{
+          width: "55%",
+          padding: "1.5rem",
+          backgroundColor: "white",
+          borderRadius: "1rem",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+          fontFamily: "Roboto, sans-serif",
+          fontSize: "0.9rem",
+          fontWeight: "500",
+        }}
+      >
+        {/* 🔘 Toggle arriba a la derecha */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showAll}
+                onChange={() => setShowAll(!showAll)}
+                color="primary"
+              />
+            }
+            label={showAll ? "Hide Chart" : "Show Chart"}
+          />
+        </div>
+
         <form onSubmit={handleSubmit}>
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "1rem",
-            marginBottom: "1.5rem",
-            flexWrap: "wrap"
-          }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "1rem",
+              marginBottom: "1.5rem",
+              flexWrap: "wrap",
+            }}
+          >
             <div style={{ minWidth: "120px", textAlign: "left" }}>
-              <div style={{
-                fontSize: "0.9rem",
-                fontWeight: "500",
-                color: "#555",
-                fontFamily: "Roboto, sans-serif"
-              }}>
+              <div
+                style={{
+                  fontSize: "0.9rem",
+                  fontWeight: "500",
+                  color: "#555",
+                  fontFamily: "Roboto, sans-serif",
+                }}
+              >
                 Peso Ideal: <strong>74 kg</strong>
               </div>
             </div>
 
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem",
-              flexShrink: 0,
-              flexGrow: 1,
-              justifyContent: "flex-end"
-            }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
+                flexShrink: 0,
+                flexGrow: 1,
+                justifyContent: "flex-end",
+              }}
+            >
               <div style={{ display: "flex", gap: "1rem", marginRight: "1rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <div style={{ width: "14px", height: "14px", backgroundColor: "#008FFB", borderRadius: "50%" }}></div>
-                  <span style={{
-                    fontFamily: "Roboto, sans-serif",
-                    fontWeight: "500",
-                    fontSize: "0.9rem",
-                    color: "#444"
-                  }}>
+                  <div
+                    style={{
+                      width: "14px",
+                      height: "14px",
+                      backgroundColor: "#008FFB",
+                      borderRadius: "50%",
+                    }}
+                  ></div>
+                  <span
+                    style={{
+                      fontFamily: "Roboto, sans-serif",
+                      fontWeight: "500",
+                      fontSize: "0.9rem",
+                      color: "#444",
+                    }}
+                  >
                     Ideal
                   </span>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <div style={{ width: "14px", height: "14px", backgroundColor: "#00E396", borderRadius: "50%" }}></div>
-                  <span style={{
-                    fontFamily: "Roboto, sans-serif",
-                    fontWeight: "500",
-                    fontSize: "0.9rem",
-                    color: "#444"
-                  }}>
+                  <div
+                    style={{
+                      width: "14px",
+                      height: "14px",
+                      backgroundColor: "#00E396",
+                      borderRadius: "50%",
+                    }}
+                  ></div>
+                  <span
+                    style={{
+                      fontFamily: "Roboto, sans-serif",
+                      fontWeight: "500",
+                      fontSize: "0.9rem",
+                      color: "#444",
+                    }}
+                  >
                     Actual
                   </span>
                 </div>
@@ -251,7 +294,7 @@ const WeightChart = () => {
                   width: "120px",
                   fontSize: "0.9rem",
                   fontFamily: "Roboto, sans-serif",
-                  fontWeight: "500"
+                  fontWeight: "500",
                 }}
               />
               <input
@@ -264,7 +307,7 @@ const WeightChart = () => {
                   border: "1px solid #ccc",
                   fontSize: "0.9rem",
                   fontFamily: "Roboto, sans-serif",
-                  fontWeight: "500"
+                  fontWeight: "500",
                 }}
               />
               <button
@@ -278,7 +321,7 @@ const WeightChart = () => {
                   fontWeight: "500",
                   fontSize: "0.9rem",
                   fontFamily: "Roboto, sans-serif",
-                  cursor: "pointer"
+                  cursor: "pointer",
                 }}
               >
                 Agregar
@@ -287,7 +330,8 @@ const WeightChart = () => {
           </div>
         </form>
 
-        <Chart options={options} series={series} type="line" height={300} width="100%" />
+        {/* Mostrar/ocultar el gráfico según el toggle */}
+        {showAll && <Chart options={options} series={series} type="line" height={300} width="100%" />}
       </div>
     </div>
   );
