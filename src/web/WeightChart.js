@@ -190,19 +190,19 @@ const WeightChart = () => {
           fontWeight: "500",
         }}
       >
-        {/* 🔘 Toggle arriba a la derecha */}
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showAll}
-                onChange={() => setShowAll(!showAll)}
-                color="primary"
-              />
-            }
-            label={showAll ? "Hide Chart" : "Show Chart"}
-          />
-        </div>
+<div style={{ display: "flex", justifyContent: "flex-start", marginBottom: "1rem" }}>
+  <FormControlLabel
+    control={
+      <Switch
+        checked={showAll}
+        onChange={() => setShowAll(!showAll)}
+        color="primary"
+      />
+    }
+    label={showAll ? "Hide Chart" : "Show Chart"}
+  />
+</div>
+
 
         <form onSubmit={handleSubmit}>
           <div
