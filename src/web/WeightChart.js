@@ -310,22 +310,26 @@ const WeightChart = () => {
                   fontWeight: "500",
                 }}
               />
-              <button
-                type="submit"
-                style={{
-                  padding: "0.55rem 1.1rem",
-                  borderRadius: "0.5rem",
-                  border: "none",
-                  backgroundColor: "#8e44ad",
-                  color: "white",
-                  fontWeight: "500",
-                  fontSize: "0.9rem",
-                  fontFamily: "Roboto, sans-serif",
-                  cursor: "pointer",
-                }}
-              >
-                Agregar
-              </button>
+<button
+  type="submit"
+  style={{
+    borderRadius: "20px",
+    padding: "8px 18px",
+    fontWeight: "800",
+    textTransform: "none",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+    border: "none",
+    backgroundColor: "#1976d2", // 💙 mismo color que "primary" de MUI
+    color: "white",
+    fontFamily: "Roboto, sans-serif",
+    cursor: "pointer",
+  }}
+>
+  +
+</button>
+
+
+
             </div>
           </div>
         </form>
