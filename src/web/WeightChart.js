@@ -314,7 +314,7 @@ const WeightChart = () => {
   type="submit"
   style={{
     borderRadius: "20px",
-    padding: "8px 18px",
+    padding: "6px 26px",
     fontWeight: "800",
     textTransform: "none",
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
