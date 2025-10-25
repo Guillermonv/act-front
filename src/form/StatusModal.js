@@ -7,7 +7,8 @@ import Button from "@mui/material/Button";
 
 import { BASE_URL } from "./constants";
 
-const API_URL = `${BASE_URL}/activities/update`;;
+
+const UPDATE_API_URL = `${BASE_URL}/activities/update`;
 
 const statusLevels = [
   { value: 0.15, label: "suck", color: "#000000" },
