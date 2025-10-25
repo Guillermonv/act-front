@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import Slider from "@mui/material/Slider";
 import Button from "@mui/material/Button";
 
-import { BASE_URL } from "./constants";
+import { BASE_URL } from "../web/constants";
 
 
 const UPDATE_API_URL = `${BASE_URL}/activities/update`;
