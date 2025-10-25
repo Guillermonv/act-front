@@ -5,7 +5,9 @@ import Typography from "@mui/material/Typography";
 import Slider from "@mui/material/Slider";
 import Button from "@mui/material/Button";
 
-const UPDATE_API_URL = "http://44.204.238.86:80/activities/update";
+import { BASE_URL } from "./constants";
+
+const API_URL = `${BASE_URL}/activities/update`;;
 
 const statusLevels = [
   { value: 0.15, label: "suck", color: "#000000" },
