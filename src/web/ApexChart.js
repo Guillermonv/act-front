@@ -5,8 +5,9 @@ import { FormControl, InputLabel, MenuItem, Select, Switch, FormControlLabel } f
 
 import "@fontsource/roboto";
 import "@fontsource/montserrat";
+import { BASE_URL } from "./constants";
 
-const API_URL = "http://44.204.238.86:80/activities/grouped";
+const API_URL = `${BASE_URL}/activities/grouped`;
 
 const parseDate = (dateStr) => {
   const [day, month, year] = dateStr.split("-").map(Number);

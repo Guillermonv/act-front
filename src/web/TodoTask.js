@@ -11,7 +11,9 @@ import {
   TextField,
 } from "@mui/material";
 
-const API_URL = "http://localhost:8080/tasks"; // mock API
+import { BASE_URL } from "./constants";
+
+const API_URL = `${BASE_URL}/tasks`; // mock API
 
 const STATUS_ORDER = ["open", "blocked", "in_progress", "done"];
 const STATUS_LABEL = {

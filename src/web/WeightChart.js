@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import { FormControlLabel, Switch } from "@mui/material";
 
+import { BASE_URL } from "./constants";
+
 // Interpolación lineal controlando límites
 const interpolateWithinRange = (data, allDates) => {
   const result = [];
@@ -49,7 +51,7 @@ const WeightChart = () => {
   const [showAll, setShowAll] = useState(true); // 🔘 Estado del toggle
 
   const fetchData = () => {
-    fetch("http://44.204.238.86:80/weight/list")
+    fetch(`${BASE_URL}/weight/list`)
       .then((res) => res.json())
       .then(setData)
       .catch((err) => console.error("Error cargando data:", err));
@@ -158,7 +160,7 @@ const WeightChart = () => {
       weight: parseFloat(newWeight),
     };
 
-    fetch("http://44.204.238.86:80/weight/add", {
+    fetch(`${BASE_URL}/weight/add`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
